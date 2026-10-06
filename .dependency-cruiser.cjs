@@ -15,6 +15,20 @@ module.exports = {
       to: { path: "^src/adapters/", reachable: true },
     },
     {
+      name: "core-never-reaches-forge-sdk",
+      comment:
+        "The core reaches a forge only through the forge port. Forge SDKs " +
+        "such as Octokit belong to the forge adapters, so the port cannot " +
+        "quietly take on one forge's API. Like the rule above, it follows " +
+        "imports to any depth.",
+      severity: "error",
+      from: { path: "^src/core/" },
+      to: {
+        path: "(^|/)node_modules/(@octokit/|octokit/|@gitbeaker/|azure-devops-node-api/)",
+        reachable: true,
+      },
+    },
+    {
       name: "not-to-unresolvable",
       comment:
         "An import the cruiser cannot resolve could point at an adapter, so " +

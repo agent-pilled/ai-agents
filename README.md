@@ -26,18 +26,19 @@ pnpm check      # everything CI runs
 | `pnpm lint`      | checks lint rules, formatting and import order    |
 | `pnpm fix`       | applies the formatting and safe lint fixes        |
 | `pnpm typecheck` | type-checks the code in strict mode               |
-| `pnpm deps`      | checks that the core never reaches an adapter     |
+| `pnpm deps`      | checks the core's import rules (below)            |
 
 ## Layout
 
-- `src/core` holds the domain and the ports. It never imports an adapter,
-  directly or through another module.
+- `src/core` holds the domain and the ports. It never imports an adapter or a
+  forge SDK such as Octokit, directly or through another module.
 - `src/adapters` holds one directory per seam: `forge`, `harness`, `keychain`
   and `isolation`. Configuration will select the adapter for each seam.
 - `tools` holds operator tooling that is not runtime code, such as the helper
   that registers the GitHub Apps ([docs/github-apps.md](docs/github-apps.md)).
 - `test` holds the tests, outside `src` so that a test can wire the core to an
-  adapter, such as the fake forge.
+  adapter, such as the fake forge. `test/forge/contract.test.ts` specifies the
+  forge port, and every forge adapter must pass it.
 
 `dependency-cruiser` enforces the first rule, locally with `pnpm deps` and in
 CI. Relative imports spell out the `.ts` extension, so Node can run the source
