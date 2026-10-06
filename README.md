@@ -34,6 +34,8 @@ pnpm check      # everything CI runs
   directly or through another module.
 - `src/adapters` holds one directory per seam: `forge`, `harness`, `keychain`
   and `isolation`. Configuration will select the adapter for each seam.
+- `tools` holds operator tooling that is not runtime code, such as the helper
+  that registers the GitHub Apps ([docs/github-apps.md](docs/github-apps.md)).
 - `test` holds the tests, outside `src` so that a test can wire the core to an
   adapter, such as the fake forge.
 
