@@ -1,8 +1,9 @@
 # Landscape
 
 A snapshot of products, projects and evidence near Forgecrew, taken on
-2026-10-05. Star counts and product features change quickly; treat figures as
-of that date. Claims seen only in secondary sources are marked (unverified).
+2026-10-05, with agent runtimes added on 2026-10-06. Star counts and product
+features change quickly; treat figures as of those dates. Claims seen only in
+secondary sources are marked (unverified).
 
 ## Summary
 
@@ -83,6 +84,59 @@ All had 0–30 stars on the snapshot date.
 | [ai-delivery](https://github.com/aviaratech/ai-delivery) | author and reviewer Apps bound to required checks on the exact head | a tool an agent calls, not a lifecycle; GitHub-only |
 | [agent-meeting](https://github.com/Wangnov/agent-meeting) | six roles on six Apps, driven by comments | inactive since April 2026 |
 
+## Agent runtimes and sandboxes
+
+Managed agent runtimes and sandbox services are infrastructure that could sit
+under Forgecrew, not competitors to it. None replaces the protocol, identities,
+scheduler, dispatchers or evaluations. They fall into three groups.
+
+**Vendor-run agent loops.** Claude Managed Agents, the OpenAI Agents API,
+Bedrock Managed Agents and Google's Managed Agents API run the vendor's own
+agent loop; their self-hosted modes only execute tool calls on the operator's
+machine. At most one could serve as a box configuration to evaluate. Each is
+locked to one model family, billed through API keys and sends tool traffic to
+the vendor.
+
+**Hosted sandboxes for an unmodified harness.** DigitalOcean Managed Agents
+(public preview since 2026-09-22) is the closest match to a pass: one
+Firecracker microVM per session, Claude Code and Codex adapters, and checkpoint
+and fork. AWS AgentCore Runtime, Azure Foundry hosted agents, Google Agent
+Runtime, E2B, Modal, Vercel Sandbox, Fly Sprites, Northflank and Cloudflare
+Sandboxes also run unmodified CLIs. They are candidates for remote adapters of
+the isolation port, with frictions:
+
+- A remote sandbox cannot reach a broker on a Unix socket
+  ([#8](https://github.com/mvasin/forgecrew/issues/8)).
+- The worktree and credentials leave the operator's infrastructure.
+  DigitalOcean puts secrets in the sandbox as environment variables.
+- Idle limits clash with long passes: DigitalOcean suspends after 15 minutes
+  without model or tool calls, AgentCore defaults to an 8-hour session with a
+  15-minute idle timeout, and Cloudflare allows at most 6 hours of inactivity
+  and replaces instances during rollouts.
+- Compute costs about $0.05–0.25 an hour, small next to tokens.
+
+E2B's infrastructure (Apache-2.0), GKE Agent Sandbox and microsandbox are
+open-source options that fit self-hosting. Daytona moved to closed source in
+2026.
+
+**Platform patterns worth borrowing.**
+
+- Credentials injected at egress, so the value never enters the sandbox
+  (Vercel Sandbox, Cloudflare Outbound Workers, Claude Managed Agents vaults,
+  the OpenAI Agents API proxy) ([#7](https://github.com/mvasin/forgecrew/issues/7)).
+- One lock object per key, as with a Cloudflare Durable Object per
+  `(role, change)`, if a role ever spans hosts.
+- Checkpoint and fork as fixed starting states for replays.
+- Per-agent workload identities (AgentCore Identity, Entra agent IDs, SPIFFE)
+  as per-role identities for cloud resources.
+
+**Billing terms.** Anthropic permits signing in to the unmodified Claude Code
+binary with one's own subscription, including on hosted platforms. Products
+built on the Agent SDK must use API keys, credentials may not be collected,
+stored or intermediated, and Pro and Max limits assume ordinary, individual
+usage. A Claude box therefore drives the CLI, and API-key billing needs to be a
+first-class option ([#9](https://github.com/mvasin/forgecrew/issues/9)).
+
 ## Schools of thought
 
 - **Lights-out factory.** StrongDM's software factory (February 2026): no human
@@ -137,6 +191,13 @@ All had 0–30 stars on the snapshot date.
   arm to evaluations;
   [#5](https://github.com/mvasin/forgecrew/issues/5) evaluate author and
   reviewer model pairings.
+- Agent runtimes suggest three more changes:
+  [#7](https://github.com/mvasin/forgecrew/issues/7) inject keychain
+  credentials at egress;
+  [#8](https://github.com/mvasin/forgecrew/issues/8) keep the broker's
+  transport independent of the Unix socket;
+  [#9](https://github.com/mvasin/forgecrew/issues/9) ship an API-key path for
+  Claude boxes and document subscription use.
 - On GitHub, rulesets that pin a required check to an App already provide the
   gate, and GitHub Agentic Workflows' safe-outputs design is worth studying
   before the broker's write path is built.
@@ -166,6 +227,18 @@ All had 0–30 stars on the snapshot date.
   [Kodus](https://github.com/kodustech/kodus-ai) ·
   [policy-bot](https://github.com/palantir/policy-bot) ·
   [Martian benchmark coverage](https://blog.kilo.ai/p/martians-independent-benchmark-tested)
+- Runtimes: [DigitalOcean Managed Agents](https://www.digitalocean.com/blog/managed-agents-public-preview) ·
+  [DigitalOcean limits](https://docs.digitalocean.com/products/managed-agents/agent-harness-runtime/details/) ·
+  [Cloudflare Agents](https://developers.cloudflare.com/agents/) ·
+  [Cloudflare coding agents](https://developers.cloudflare.com/sandbox/coding-agents/) ·
+  [Claude Managed Agents](https://platform.claude.com/docs/en/managed-agents/overview) ·
+  [OpenAI Agents API](https://developers.openai.com/api/docs/guides/agents-api/overview) ·
+  [AgentCore for coding agents](https://aws.amazon.com/blogs/machine-learning/its-safe-to-close-your-laptop-now-hosting-coding-agents-on-amazon-bedrock-agentcore/) ·
+  [Azure Foundry hosted agents](https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/hosted-agents) ·
+  [Vercel Sandbox](https://vercel.com/docs/vercel-sandbox) ·
+  [E2B infrastructure](https://github.com/e2b-dev/infra) ·
+  [GKE Agent Sandbox](https://github.com/kubernetes-sigs/agent-sandbox) ·
+  [Anthropic legal and compliance](https://code.claude.com/docs/en/legal-and-compliance)
 - Thinking: [StrongDM software factory](https://factory.strongdm.ai/) ·
   [Simon Willison on StrongDM](https://simonw.substack.com/p/how-strongdms-ai-team-build-serious) ·
   [LaunchDarkly](https://launchdarkly.com/blog/building-a-software-factory-on-our-scariest-code/) ·
