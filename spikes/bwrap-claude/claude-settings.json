@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash /opt/forgecrew/spike/hook-probe.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
