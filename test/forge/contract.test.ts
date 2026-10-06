@@ -7,6 +7,7 @@ import type {
 } from "../../src/core/domain/index.ts";
 import type { DiscoveredChange, Forge } from "../../src/core/ports/index.ts";
 import { localRepository } from "./git.ts";
+import { gitHubForge } from "./github/harness.ts";
 import {
   aChange,
   type ForgeFactory,
@@ -31,6 +32,10 @@ const forges: { name: string; create: ForgeFactory }[] = [
         identity: given.identity,
         cases: given.changes.map((change) => ({ change })),
       }),
+  },
+  {
+    name: "GitHub",
+    create: async (given) => (await gitHubForge(given)).forge,
   },
 ];
 

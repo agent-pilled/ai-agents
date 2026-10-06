@@ -17,6 +17,10 @@
     "test": "vitest run",
     "deps": "depcruise src --config"
   },
+  "dependencies": {
+    "@octokit/app": "16.1.4",
+    "@octokit/rest": "22.0.1"
+  },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
     "@types/node": "^24.19.1",
