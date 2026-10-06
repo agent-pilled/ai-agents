@@ -139,12 +139,18 @@ Responses by role:
 - **lanes:** verdict (`accepted` or `issues`), findings (path, line, body,
   severity), replies to existing threads, optional follow-up issue proposals;
 - **dev-bot:** commits to publish (made locally in its worktree), replies, lane
-  requests, then `ready`, `ready with doubt` plus a reason, or a question for
-  the Accountable person; optional follow-up issue proposals;
+  requests, then `ready`, `ready with doubt` plus a reason, `impossible` plus
+  the reason and evidence, or a question for the Accountable person; optional
+  follow-up issue proposals;
 - **arbiter-bot:** a round extension with cited evidence, an answer citing its
   source on record, or a forwarded question.
 
 Nits never fail a lane; only actionable findings set `issues`.
+
+`impossible` means the work cannot be done as specified. dev-bot stops instead
+of pushing a workaround, and the dispatcher turns the reason into a question for
+the Accountable person, through arbiter-bot once it exists. An explicit exit
+like this sharply reduces agents faking success on tasks they cannot complete.
 
 ### Broker
 
