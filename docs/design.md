@@ -154,8 +154,12 @@ like this sharply reduces agents faking success on tasks they cannot complete.
 
 ### Broker
 
-The dispatcher runs one broker per pass on a Unix socket mounted into the
-sandbox and described by `/openapi.json`. It offers:
+The dispatcher runs one broker per pass. The broker is defined by its API,
+described by `/openapi.json`; its transport belongs to the isolation adapter.
+A local sandbox reaches it on a Unix socket mounted into the sandbox. A remote
+sandbox reaches a per-pass HTTPS endpoint outbound through a relay, so the
+operator's host still accepts no inbound connections. The pass contract gives
+the box an address, whatever its scheme. The broker offers:
 
 - forge reads within the role's **read scope** (configuration), with code
   search over warm mirrors via `git grep`, every repository pinned to the pass's
@@ -167,8 +171,8 @@ sandbox and described by `/openapi.json`. It offers:
 - a checkpoint for dev-bot, asking the dispatcher to publish work in progress.
 
 The pass token is renewable while the pass runs, revoked when it ends, and
-useless outside the sandbox. The keychain backend's own credentials never enter
-the box.
+accepted only on that pass's transport. The keychain backend's own credentials
+never enter the box.
 
 ### Mechanical rules on the way out
 
@@ -322,7 +326,7 @@ of scope.
 | forge | a domain-level port (discover, read change, claim, verdict, finding, publish, ready, merge); GitHub first, then Azure DevOps, GitLab later |
 | harness | a box definition as data (command, environment, model, effort) plus a small parser per harness family for activity and token spend |
 | keychain backend | list and get |
-| isolation | start, mount, kill; bwrap first |
+| isolation | start, mount, kill, and the broker's transport; bwrap with a Unix socket first |
 
 The fake forge is a real adapter from day one, backed by recorded cases. Every
 forge adapter passes one shared contract-test suite. The core never imports an
