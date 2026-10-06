@@ -139,17 +139,27 @@ Responses by role:
 - **lanes:** verdict (`accepted` or `issues`), findings (path, line, body,
   severity), replies to existing threads, optional follow-up issue proposals;
 - **dev-bot:** commits to publish (made locally in its worktree), replies, lane
-  requests, then `ready`, `ready with doubt` plus a reason, or a question for
-  the Accountable person; optional follow-up issue proposals;
+  requests, then `ready`, `ready with doubt` plus a reason, `impossible` plus
+  the reason and evidence, or a question for the Accountable person; optional
+  follow-up issue proposals;
 - **arbiter-bot:** a round extension with cited evidence, an answer citing its
   source on record, or a forwarded question.
 
 Nits never fail a lane; only actionable findings set `issues`.
 
+`impossible` means the work cannot be done as specified. dev-bot stops instead
+of pushing a workaround, and the dispatcher turns the reason into a question for
+the Accountable person, through arbiter-bot once it exists. An explicit exit
+like this sharply reduces agents faking success on tasks they cannot complete.
+
 ### Broker
 
-The dispatcher runs one broker per pass on a Unix socket mounted into the
-sandbox and described by `/openapi.json`. It offers:
+The dispatcher runs one broker per pass. The broker is defined by its API,
+described by `/openapi.json`; its transport belongs to the isolation adapter.
+A local sandbox reaches it on a Unix socket mounted into the sandbox. A remote
+sandbox reaches a per-pass HTTPS endpoint outbound through a relay, so the
+operator's host still accepts no inbound connections. The pass contract gives
+the box an address, whatever its scheme. The broker offers:
 
 - forge reads within the role's **read scope** (configuration), with code
   search over warm mirrors via `git grep`, every repository pinned to the pass's
@@ -161,8 +171,8 @@ sandbox and described by `/openapi.json`. It offers:
 - a checkpoint for dev-bot, asking the dispatcher to publish work in progress.
 
 The pass token is renewable while the pass runs, revoked when it ends, and
-useless outside the sandbox. The keychain backend's own credentials never enter
-the box.
+accepted only on that pass's transport. The keychain backend's own credentials
+never enter the box.
 
 ### Mechanical rules on the way out
 
@@ -187,6 +197,31 @@ Every pass of every role gets a fresh context and a fresh environment.
 In a lane's checkout, the dispatcher replaces the repository's agent
 instruction files (`AGENTS.md`, `CLAUDE.md`) with the base branch's versions.
 Changes to them reach the lane only as diff. A pass dies with its dispatcher.
+
+### Harness sign-in
+
+A box signs in to its model provider in a way the harness vendor permits for
+unattended use. Every box definition supports two paths:
+
+- **Subscription:** the operator signs in through the vendor's own flow, one
+  sign-in per role, held in that role's keychain account. For Claude Code this
+  is a long-lived token from `claude setup-token`.
+- **API key:** billed to the key's owner, and required for anything built on a
+  vendor's agent SDK.
+
+Anthropic permits signing in to the unmodified Claude Code binary with one's own
+subscription, including where a platform hosts it. It requires API keys for
+products built on the Agent SDK, forbids developers to collect, store or
+intermediate Claude account credentials, and states that Pro and Max limits
+assume ordinary, individual usage
+([terms](https://code.claude.com/docs/en/legal-and-compliance)). A Claude box
+therefore drives the unmodified CLI, never the Agent SDK. Forgecrew never
+relays one person's subscription to another; each operator chooses a path with
+those terms in view. Other harnesses get the same check before their box
+definitions ship.
+
+Until credentials are injected at egress, the model credential enters the
+sandbox as the harness's environment, and the secret-leak filter covers it.
 
 ### Credentials
 
@@ -314,9 +349,9 @@ of scope.
 | Seam | Shape |
 | --- | --- |
 | forge | a domain-level port (discover, read change, claim, verdict, finding, publish, ready, merge); GitHub first, then Azure DevOps, GitLab later |
-| harness | a box definition as data (command, environment, model, effort) plus a small parser per harness family for activity and token spend |
+| harness | a box definition as data (command, environment, model, effort, sign-in path) plus a small parser per harness family for activity and token spend |
 | keychain backend | list and get |
-| isolation | start, mount, kill; bwrap first |
+| isolation | start, mount, kill, and the broker's transport; bwrap with a Unix socket first |
 
 The fake forge is a real adapter from day one, backed by recorded cases. Every
 forge adapter passes one shared contract-test suite. The core never imports an
@@ -324,26 +359,30 @@ adapter; `dependency-cruiser` enforces it in CI.
 
 ## Bootstrap
 
-**Stage 0** is built through conversational development, until the minimal core
-takes one issue to a merged change with the hard boundary in place:
+Stage 0 is built through conversational development, in milestones that keep
+the hard boundary from the first one and defer robustness:
 
-- the forge port with the GitHub and fake adapters and the contract tests;
-- dev-bot, review-bot and read-only scheduler identities; rulesets and
-  CODEOWNERS;
-- a minimal scheduler (discovery and keys);
-- dispatchers with the lock, claim lifecycle, crash handling, timeouts,
-  response validation and the mechanical rules, including allowed actors and
-  the secret-leak filter;
-- the broker, the bwrap sandbox, one bare box definition and per-role response
-  schemas;
-- outcome recording.
+1. **M0, skeleton.** The TypeScript repository with CI and the dependency rule;
+   the forge port with the GitHub and fake adapters and their contract tests;
+   and a spike that runs Claude Code headless in bwrap with a fresh HOME, token
+   sign-in, and network limited to the model API and the broker.
+2. **M1, review lane.** The review-bot and read-only scheduler identities; a
+   ruleset that requires the review check, and CODEOWNERS; a minimal scheduler
+   (discovery and keys); the review dispatcher with the lock, claim lifecycle,
+   response validation and the mechanical rules, including allowed actors and
+   the secret-leak filter; the broker, the bwrap sandbox, one bare box
+   definition and outcome recording. From here, conversation-authored changes
+   to Forgecrew get an independent review lane that can block a merge.
+3. **M2, dev-bot.** The dev-bot identity, work started by a mention on an issue,
+   the review loop, readiness, and the merge after the Accountable person's
+   approval. Closing one issue this way is the **cutover**: from then on, every
+   Forgecrew change starts as an issue, and conversation keeps only deploys and
+   break-glass.
+4. **M3, robustness.** Crash retries, stall detection and deadlines, the quota
+   gate, and the scheduler's priority and dependency holds.
 
-**Cutover:** from then on, every Forgecrew change starts as an issue.
-Conversation keeps only deploys and break-glass.
-
-**After cutover**, Forgecrew builds arbiter-bot, scheduler priority and
-dependency holds, multiple instances, the evaluation harness, qa-bot for
-product repositories, and the Azure DevOps adapter.
+**After M3**, Forgecrew builds arbiter-bot, multiple instances, the evaluation
+harness, qa-bot for product repositories, and the Azure DevOps adapter.
 
 ## Parked
 
