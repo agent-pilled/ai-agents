@@ -5,9 +5,9 @@ can Claude Code run headless inside bwrap with a fresh HOME, a token from
 `claude setup-token`, and network limited to the model API and the broker?
 It records what works, what leaks and what the harness writes to HOME.
 
-**Status: run with a placeholder token on 2026-10-06.** The sandbox and its
-network held; a run with a real token, which shows whether the harness
-answers, is still to come. See [Results](#results).
+**Status: run on 2026-10-06, with a placeholder token and with a real one.**
+The harness answered inside the sandbox, its network held to the model API,
+and one leak is open. See [Results](#results).
 
 ## How it works
 
@@ -239,40 +239,50 @@ A real run needs Linux and bwrap, so no test performs one.
 
 ## Results
 
-### First runs: placeholder token, 2026-10-06
+All runs took place on 2026-10-06 on an Ubuntu 26.04.1 LTS VM with kernel
+7.0.0, unprivileged user namespaces enabled, bubblewrap 0.11.1, bash 5.3.9,
+Node.js 24.21.0 and the native Claude Code 2.1.291 binary.
 
-**Host:** an Ubuntu 26.04.1 LTS VM with kernel 7.0.0, unprivileged user
-namespaces enabled, bubblewrap 0.11.1, bash 5.3.9, Node.js 24.21.0 and the
-native Claude Code 2.1.291 binary.
+| Run | Token | `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` | Harness |
+| --- | --- | --- | --- |
+| 1 | random 60-character placeholder | on | `401 Invalid bearer token` after two retries, exit 1 |
+| 2 | the same placeholder | off (`--no-scrub`) | the same |
+| 3 | a real token from `claude setup-token` | on | answered `pong` in one turn, 1148 ms, exit 0 |
 
-**Token:** a random 60-character placeholder in a mode-600 file, because no
-real `claude setup-token` token was available. The harness therefore stops at
-authentication. These runs test the sandbox, its plumbing and its leaks, not a
-model answer.
+The real token reached a mode-600 file without passing through an argument or
+the terminal, and was deleted after the run. The real-token run was not repeated without
+the scrub: runs 1 and 2 already isolate the scrub's effects, and every run
+spends the subscription.
 
-**Runs:** `run.sh --token-file FILE`, and the same with `--no-scrub`. Every
-probe had the same outcome in both; the differences are in what the harness
-wrote, below.
-
-#### What worked
+### What worked
 
 - bwrap accepted the whole layout: every namespace unshared, the read-only
   root, the two sockets bind-mounted as files, and descriptor 3 passed into the
-  sandbox, read and closed by the entry script.
-- Claude Code honoured `HTTPS_PROXY` through the bridge. It opened three
-  CONNECT tunnels to `api.anthropic.com:443` (105 KB up, 16 KB down in all),
-  and the API answered `401 Invalid bearer token`, so the token reached the API
-  as a bearer credential.
-- The stream held an `init` event (credential source `none`, meaning no API
-  key, so the OAuth token was in use; 20 tools; no MCP servers), the SessionStart hook, two
-  `api_retry` events, one assistant message and a `result` with subtype
-  `success` flagged `is_error`. The harness exited 1, the sandbox 0. A whole
-  run took about 3 seconds.
-- **Hosts the harness tried:** `api.anthropic.com:443` only. The proxy denied
-  nothing while the harness ran. A signed-in session may contact more hosts;
-  only a real token can show that.
+  sandbox, read and closed by the entry script. bwrap logged nothing and
+  exited 0 in every run.
+- Claude Code honoured `HTTPS_PROXY` through the bridge and signed in with
+  `CLAUDE_CODE_OAUTH_TOKEN` from a fresh HOME without `--bare`. With the real
+  token, the stream held an `init` event (credential source `none`, meaning no
+  API key, so the OAuth token was in use; 22 tools; no MCP servers), the
+  SessionStart hook, one assistant message, one `rate_limit_event` and a
+  `success` result. The harness wrote nothing to stderr. A whole run took
+  about 3 seconds.
+- No copy of the token appeared in any process argument on the host or in the
+  sandbox, in any output file, or in HOME, `/tmp` or the workspace.
 
-#### Probes
+### Hosts contacted
+
+`api.anthropic.com:443` only, in every run. The proxy denied nothing while the
+harness ran, so a session signed in with a `claude setup-token` token needed
+no other host: no OAuth refresh on `platform.claude.com`, no telemetry, no
+update check. With the real token the harness opened three tunnels: two short
+exchanges of about 2 KB up and 5 KB down each, then the model request with
+52 KB up and 6.5 KB down. The probes add one CONNECT to the same host and one
+denied CONNECT to `example.com:443` before the harness starts.
+
+### Probes
+
+Every probe had the same outcome in all three runs.
 
 | Probe | Outcome | Detail |
 | --- | --- | --- |
@@ -294,26 +304,52 @@ wrote, below.
 | `proc-host-processes-invisible` | pass | `bwrap` (PID 1), the entry `bash`, two `node` |
 | `proc-no-capabilities` | pass | `CapEff` all zero |
 | `proc-entry-fds-clean` | pass | descriptors 0, 1, 2 and 255 (bash's script) |
-| `token-absent-from-sandbox-argv` | pass | 13 samples |
+| `token-absent-from-sandbox-argv` | pass | 9 to 13 samples per run |
 | `token-in-harness-environ` | info | present |
-| `hook-env-names` | info | see below |
+| `hook-env-names` | info | see finding 3 |
 | `hook-env-token-absent` | pass | `CLAUDE_CODE_OAUTH_TOKEN` is not in the hook's environment |
 | `hook-harness-environ-unreadable` | **fail** | the hook read the token in `/proc/PID/environ` of `claude` |
-| `token-absent-from-host-argv` | pass | 14 samples of every host process |
+| `token-absent-from-host-argv` | pass | 11 to 14 samples of every host process per run |
 | `token-absent-from-outputs` | pass | no output file holds the token |
 | `token-absent-from-home` | pass | HOME, `/tmp` and the workspace hold no copy |
 
-#### Leaks and findings
+### What a signed-in session writes
+
+HOME after the real-token run, with the scrub on: 17 files, 16 directories,
+93,793 bytes.
+
+| Path | Size in bytes |
+| --- | --- |
+| `.claude.json` | 777 |
+| `.claude/backups/.claude.json.backup.<timestamp>` | 84 |
+| `.claude/policy-limits.json` | 214 |
+| `.claude/policy-limits.json.stamp.json` | 225 |
+| `.claude/remote-settings.json` | 2 |
+| `.claude/projects/-workspace/<session>.jsonl` | 92,491 (the session transcript) |
+| `.claude/projects/-workspace/memory/`, `.claude/session-env/<session>/`, `.claude/sessions/` | empty directories |
+| `.bash_aliases`, `.bash_profile`, `.bashrc`, `.bunfig.toml`, `.gitconfig`, `.netrc`, `.npmrc`, `.profile`, `.yarnrc`, `.yarnrc.yml`, `.zshrc` | 0 each, from the scrub |
+| `.claude/seed-admin/`, `.config/anthropic/`, `.config/gh/`, `.config/git/`, `.config/glab-cli/`, `.config/pip/`, `.pip/` | empty directories, from the scrub |
+
+The two `policy-limits` files and `remote-settings.json` appear only when the
+session is signed in. Without a valid sign-in and without the scrub, HOME held
+only `.claude.json` (719 bytes), its backup and the transcript. The
+transcript is written even when the run fails to authenticate.
+
+`/tmp` received the directories `cc-socks/` and `claude-<uid>/`, and with the
+scrub also `claude-<uid>/bash-edit-diff/`, a per-session `tasks/` directory and
+an empty `inline-comments-buffer.jsonl`. The workspace is covered in finding 2.
+
+### Leaks and findings
 
 1. **A subprocess of the harness can read the model credential.** The
    SessionStart hook read `CLAUDE_CODE_OAUTH_TOKEN` from the harness's
-   `/proc/PID/environ`, with and without `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`.
-   The scrub keeps the variable out of the hook's own environment, and Claude
-   Code never passes it to the hook even without the scrub, but the parent's
-   environment stays readable to any process of the same user in the same PID
-   namespace. A Bash tool command could likely do the same; the docs say the
-   scrub runs those in their own PID namespace, which this one-word run did
-   not exercise. Until credentials are injected at egress
+   `/proc/PID/environ` in every run, the real-token run included, with and
+   without `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`. Claude Code never puts the
+   token in the hook's own environment, even without the scrub, but the
+   parent's environment stays readable to any process of the same user in the
+   same PID namespace. A Bash tool command could likely do the same; the docs
+   say the scrub runs those in their own PID namespace, which these one-word
+   runs did not exercise. Until credentials are injected at egress
    ([#7](https://github.com/mvasin/forgecrew/issues/7)), assume that anything
    the harness runs can read the token.
 2. **The scrub leaves empty placeholder files behind.** With
@@ -324,9 +360,10 @@ wrote, below.
    `.npmrc`, `.yarnrc`, `.yarnrc.yml`, `bunfig.toml`, `package-lock.json`,
    `package.json`, `pnpm-lock.yaml`, `yarn.lock`, `.claude/agents/`,
    `.claude/commands/` and `node_modules/.bin/`. It left them after it
-   exited. Without the scrub the workspace stayed empty. In dev-bot's
-   worktree they would show up as untracked files that could be committed, so
-   the dispatcher has to remove them, or the box must run without the scrub.
+   exited, signed in or not. Without the scrub the workspace stayed empty. In
+   dev-bot's worktree they would show up as untracked files that could be
+   committed, so the dispatcher has to remove them, or the box must run
+   without the scrub.
 3. **Subprocesses see Claude Code's messaging channel.** Without the scrub, the
    hook's environment also held `CLAUDE_CODE_MESSAGING_TOKEN`; the scrub
    removed it. With the scrub the hook received `AI_AGENT`, `CLAUDECODE`,
@@ -340,39 +377,21 @@ wrote, below.
    `LOGNAME`, `NoDefaultCurrentDirectoryInExePath`, `PATH`, `PWD`, `SHELL`,
    `SHLVL`, `TMPDIR` and `USER`.
 
-#### What the harness wrote
-
-Without the scrub, HOME received only Claude Code's own state:
-
-| Path | Size in bytes |
-| --- | --- |
-| `.claude.json` | 719 |
-| `.claude/backups/.claude.json.backup.<timestamp>` | 84 |
-| `.claude/projects/-workspace/<session>.jsonl` | 33,124 (the session transcript) |
-| `.claude/projects/-workspace/memory/`, `.claude/session-env/<session>/`, `.claude/sessions/` | empty directories |
-
-With the scrub, HOME also received eleven empty files (`.bash_aliases`,
-`.bash_profile`, `.bashrc`, `.bunfig.toml`, `.gitconfig`, `.netrc`,
-`.npmrc`, `.profile`, `.yarnrc`, `.yarnrc.yml`, `.zshrc`) and the empty
-directories `.claude/seed-admin/`, `.config/anthropic/`, `.config/gh/`,
-`.config/git/`, `.config/glab-cli/`, `.config/pip/` and `.pip/`; the
-transcript grew to 44,664 bytes. `/tmp` received the directories `cc-socks/`
-and `claude-<uid>/`, and with the scrub also `claude-<uid>/bash-edit-diff/`, a
-per-session `tasks/` directory and an empty `inline-comments-buffer.jsonl`.
-No file in HOME, `/tmp` or the workspace held the token.
-
-#### What the first run changed in the kit
+### What the runs changed in the kit
 
 `proc-host-processes-invisible` failed at first on the kit's own Node
 processes: Node 24 names its main thread `MainThread`, and the kernel reports
 that as the process name. The probe now names each process by its `argv[0]`.
+The summary now also lists the workspace, where the scrub's placeholder files
+appeared. The real-token run exposed no further defect.
 
-#### Verdict so far
+### Verdict
 
-bwrap with a Unix socket bridge runs the unmodified Claude Code binary
-headless, confines its network to the proxy's allowlist, and keeps the token
-off every command line and out of every file. That retires the network part of
-the risk. Two findings carry into M1: the token stays readable through
-`/proc` ([#7](https://github.com/mvasin/forgecrew/issues/7)), and the scrub's placeholder files must be cleaned or the scrub
-dropped. A run with a real token still has to show that the harness answers,
-which hosts a signed-in session contacts, and what it writes to HOME.
+bwrap with a Unix socket bridge is good enough for the M1 sandbox. It runs the
+unmodified Claude Code binary headless with a `claude setup-token` sign-in and
+a fresh HOME. It confines the harness's network to the proxy's allowlist,
+which needs only `api.anthropic.com:443`, and it keeps the token off every
+command line and out of every file. Two findings carry into M1: the token
+stays readable through `/proc` until egress injection
+([#7](https://github.com/mvasin/forgecrew/issues/7)), and the scrub's
+placeholder files must be cleaned or the scrub dropped.
