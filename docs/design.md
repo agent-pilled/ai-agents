@@ -359,26 +359,30 @@ adapter; `dependency-cruiser` enforces it in CI.
 
 ## Bootstrap
 
-**Stage 0** is built through conversational development, until the minimal core
-takes one issue to a merged change with the hard boundary in place:
+Stage 0 is built through conversational development, in milestones that keep
+the hard boundary from the first one and defer robustness:
 
-- the forge port with the GitHub and fake adapters and the contract tests;
-- dev-bot, review-bot and read-only scheduler identities; rulesets and
-  CODEOWNERS;
-- a minimal scheduler (discovery and keys);
-- dispatchers with the lock, claim lifecycle, crash handling, timeouts,
-  response validation and the mechanical rules, including allowed actors and
-  the secret-leak filter;
-- the broker, the bwrap sandbox, one bare box definition and per-role response
-  schemas;
-- outcome recording.
+1. **M0, skeleton.** The TypeScript repository with CI and the dependency rule;
+   the forge port with the GitHub and fake adapters and their contract tests;
+   and a spike that runs Claude Code headless in bwrap with a fresh HOME, token
+   sign-in, and network limited to the model API and the broker.
+2. **M1, review lane.** The review-bot and read-only scheduler identities; a
+   ruleset that requires the review check, and CODEOWNERS; a minimal scheduler
+   (discovery and keys); the review dispatcher with the lock, claim lifecycle,
+   response validation and the mechanical rules, including allowed actors and
+   the secret-leak filter; the broker, the bwrap sandbox, one bare box
+   definition and outcome recording. From here, conversation-authored changes
+   to Forgecrew get an independent review lane that can block a merge.
+3. **M2, dev-bot.** The dev-bot identity, work started by a mention on an issue,
+   the review loop, readiness, and the merge after the Accountable person's
+   approval. Closing one issue this way is the **cutover**: from then on, every
+   Forgecrew change starts as an issue, and conversation keeps only deploys and
+   break-glass.
+4. **M3, robustness.** Crash retries, stall detection and deadlines, the quota
+   gate, and the scheduler's priority and dependency holds.
 
-**Cutover:** from then on, every Forgecrew change starts as an issue.
-Conversation keeps only deploys and break-glass.
-
-**After cutover**, Forgecrew builds arbiter-bot, scheduler priority and
-dependency holds, multiple instances, the evaluation harness, qa-bot for
-product repositories, and the Azure DevOps adapter.
+**After M3**, Forgecrew builds arbiter-bot, multiple instances, the evaluation
+harness, qa-bot for product repositories, and the Azure DevOps adapter.
 
 ## Parked
 
