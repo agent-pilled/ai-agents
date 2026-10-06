@@ -6,7 +6,40 @@ in its own sandbox. The forge and the host enforce the separation between
 roles, not instructions alone. GitHub comes first; Azure DevOps and GitLab
 follow.
 
-The project is at the design stage.
+The project is at the design stage. [docs/design.md](docs/design.md) describes
+the design and [CONTEXT.md](CONTEXT.md) defines its terms.
+
+## Development
+
+Forgecrew is TypeScript on Node 24 (see [.nvmrc](.nvmrc)), managed with
+[pnpm](https://pnpm.io). A recent pnpm switches to the version pinned in
+`package.json` by itself.
+
+```sh
+pnpm install
+pnpm check      # everything CI runs
+```
+
+| Command          | Does                                              |
+| ---------------- | ------------------------------------------------- |
+| `pnpm test`      | runs the tests with Vitest                        |
+| `pnpm lint`      | checks lint rules, formatting and import order    |
+| `pnpm fix`       | applies the formatting and safe lint fixes        |
+| `pnpm typecheck` | type-checks the code in strict mode               |
+| `pnpm deps`      | checks that the core never reaches an adapter     |
+
+## Layout
+
+- `src/core` holds the domain and the ports. It never imports an adapter,
+  directly or through another module.
+- `src/adapters` holds one directory per seam: `forge`, `harness`, `keychain`
+  and `isolation`. Configuration will select the adapter for each seam.
+- `test` holds the tests, outside `src` so that a test can wire the core to an
+  adapter, such as the fake forge.
+
+`dependency-cruiser` enforces the first rule, locally with `pnpm deps` and in
+CI. Relative imports spell out the `.ts` extension, so Node can run the source
+as it is.
 
 ## License
 
