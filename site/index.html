@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Forgecrew: AI agents that can’t approve their own work</title>
+    <meta name="description" content="In development: open-source, self-hosted AI delivery in which every agent role is its own GitHub identity and an independent review can block the merge.">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#161513" media="(prefers-color-scheme: dark)">
+    <link rel="canonical" href="https://mvasin.github.io/forgecrew/">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="style.css">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Forgecrew">
+    <meta property="og:title" content="Forgecrew: AI agents that can’t approve their own work">
+    <meta property="og:description" content="In development: open-source, self-hosted AI delivery in which every agent role is its own GitHub identity and an independent review can block the merge.">
+    <meta property="og:url" content="https://mvasin.github.io/forgecrew/">
+    <meta name="twitter:card" content="summary">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="./"><img src="favicon.svg" alt="" width="28" height="28"> Forgecrew</a>
+        <nav aria-label="Sections">
+          <ul class="nav-list">
+            <li><a href="#how-it-works">How it works</a></li>
+            <li><a href="#why">Why</a></li>
+            <li><a href="#roadmap">Roadmap</a></li>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a class="nav-github" href="https://github.com/mvasin/forgecrew">GitHub</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="container hero-inner">
+          <a class="badge" href="#roadmap"><span class="badge-dot" aria-hidden="true"></span> In development: not usable yet</a>
+          <h1 id="hero-title">AI agents that can’t approve their own work.</h1>
+          <p class="lead">For developers who already hand work to AI coding
+            agents. Forgecrew takes an issue to a merged pull request with every
+            role as its own GitHub identity, an independent review that can
+            block the merge, and the final say on what lands.</p>
+          <div class="actions">
+            <a class="button button-primary" href="https://github.com/mvasin/forgecrew">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
+              Star on GitHub</a>
+            <a class="button button-secondary" href="https://github.com/mvasin/forgecrew/blob/main/docs/design.md">Read the design</a>
+          </div>
+          <p class="hero-meta">Open source, Apache-2.0 · Self-hosted · GitHub
+            first</p>
+        </div>
+      </section>
+
+      <section id="how-it-works" class="section" aria-labelledby="how-title">
+        <div class="container">
+          <p class="eyebrow">How it works</p>
+          <h2 id="how-title">Separate roles, enforced by GitHub, with you at the end</h2>
+          <figure class="flow" aria-labelledby="flow-caption">
+            <ol class="flow-steps">
+              <li class="flow-step">
+                <p class="flow-actor">Issue</p>
+                <p class="flow-title">You mention <code>@dev-bot</code></p>
+                <p class="flow-text">Only people you allow can start
+                  work.</p>
+                <span class="flow-arrow" aria-hidden="true"></span>
+              </li>
+              <li class="flow-step flow-bot">
+                <p class="flow-actor"><code>dev-bot</code></p>
+                <p class="flow-title">Writes the change</p>
+                <p class="flow-text">In a fresh sandbox, then opens a pull
+                  request.</p>
+                <p class="flow-identity">Own identity · own sandbox</p>
+                <span class="flow-arrow" aria-hidden="true"></span>
+              </li>
+              <li class="flow-step flow-bot">
+                <p class="flow-actor"><code>review-bot</code></p>
+                <p class="flow-title">Reviews the exact commit</p>
+                <p class="flow-text">Its verdict is a required check that
+                  only it can set.</p>
+                <p class="flow-identity">Own identity · own sandbox</p>
+                <p class="flow-loop"><span>Issues found? Back to
+                  <code>dev-bot</code>. Every new commit needs a new
+                  review.</span></p>
+                <span class="flow-arrow flow-gate" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
+              </li>
+              <li class="flow-step flow-you">
+                <p class="flow-actor">You</p>
+                <p class="flow-title">Approve, and it merges</p>
+                <p class="flow-text">GitHub refuses the merge without the
+                  review, and without your approval where you require
+                  it.</p>
+              </li>
+            </ol>
+            <figcaption id="flow-caption">An issue goes to <code>dev-bot</code>,
+              its pull request to <code>review-bot</code>, and the merge waits
+              behind a gate for the review and, where you require it, for
+              you. Each bot is a
+              separate GitHub identity in a separate sandbox, so neither can
+              act as the other.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="benefits" class="section section-alt" aria-labelledby="benefits-title">
+        <div class="container">
+          <p class="eyebrow">What you get</p>
+          <h2 id="benefits-title">Hand over the work, keep the judgement</h2>
+          <ul class="cards cards-4">
+            <li class="card">
+              <svg class="card-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="8" r="3"/><path d="M2.5 20c0-3.2 2.4-5.5 5.5-5.5s5.5 2.3 5.5 5.5"/><path d="M13.6 15.1c.9-.4 1.9-.6 2.9-.6 3.1 0 5.5 2.3 5.5 5.5"/></svg>
+              <h3>No agent approves its own work</h3>
+              <p>The author and the reviewer are separate GitHub identities
+                with separate keys and sandboxes. Neither can act as the
+                other.</p>
+            </li>
+            <li class="card">
+              <svg class="card-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l7.5 3v6c0 4.7-3.1 8-7.5 9.4-4.4-1.4-7.5-4.7-7.5-9.4v-6z"/><path d="M8.7 12.2l2.3 2.3 4.3-4.6"/></svg>
+              <h3>A review that can block the merge</h3>
+              <p>The review is a required check on the exact commit. A new
+                push clears it, and GitHub will not merge without it.</p>
+            </li>
+            <li class="card">
+              <svg class="card-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="7.5" r="4"/><path d="M2.5 21c0-4.3 3.3-7.5 7.5-7.5 1.2 0 2.3.3 3.3.7"/><path d="M14.5 18.5l2.3 2.3 4.7-5"/></svg>
+              <h3>You decide what merges</h3>
+              <p>You choose which changes need your approval, and changes to
+                the rules Forgecrew enforces always do. When a task cannot be
+                done as written, the agent can say so instead of faking
+                it.</p>
+            </li>
+            <li class="card">
+              <svg class="card-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3.5" width="18" height="7.5" rx="2"/><rect x="3" y="13" width="18" height="7.5" rx="2"/><path d="M7 7.25h.01M7 16.75h.01"/></svg>
+              <h3>Yours to run</h3>
+              <p>Open source and self-hosted, with nothing exposed to the
+                internet. Runs on the AI subscription you already have, and
+                leaves a reserve for your own work.</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="why" class="section" aria-labelledby="why-title">
+        <div class="container">
+          <p class="eyebrow">Why Forgecrew</p>
+          <h2 id="why-title">Why not just…</h2>
+          <ul class="cards cards-3">
+            <li class="card contrast">
+              <h3>…let the agent review its own work?</h3>
+              <p>Agent tools often review under the identity that wrote the
+                change, and in
+                <a href="https://arxiv.org/abs/2603.12123">one study</a> a
+                model reviewing its own work found under a third of the errors
+                planted in it.</p>
+              <p class="contrast-answer">Forgecrew’s reviewer is a separate
+                identity the author cannot speak for, and it can run a
+                different model.</p>
+            </li>
+            <li class="card contrast">
+              <h3>…put the rules in the prompt?</h3>
+              <p>Instructions are requests. In
+                <a href="https://arxiv.org/html/2510.20270">one study</a>,
+                frontier models cheated on about half of the tasks that could
+                not be done as specified, by editing the tests or
+                special-casing them.</p>
+              <p class="contrast-answer">Forgecrew enforces its rules with
+                identities, sandboxes and GitHub’s merge gate, and gives the
+                agent an honest way to say a task is impossible.</p>
+            </li>
+            <li class="card contrast">
+              <h3>…use a hosted AI reviewer?</h3>
+              <p>Hosted reviewers post as one app per vendor, so they cannot
+                be a reviewer with its own identity, and some never block a
+                merge by design.</p>
+              <p class="contrast-answer">Forgecrew’s review is a required
+                check that only the reviewer’s identity can pass. After
+                launch, a self-hosted reviewer can be tried inside it.</p>
+            </li>
+          </ul>
+          <p class="section-more">How Forgecrew compares with related tools,
+            with dates and sources:
+            <a href="https://github.com/mvasin/forgecrew/blob/main/docs/landscape.md">the
+            landscape</a>.</p>
+        </div>
+      </section>
+
+      <section id="roadmap" class="section section-alt" aria-labelledby="roadmap-title">
+        <div class="container">
+          <p class="eyebrow">Roadmap</p>
+          <h2 id="roadmap-title">Where it stands</h2>
+          <p class="section-intro">Status on 7 October 2026. Forgecrew
+            launches when M3 is done: everything this page promises above
+            arrives by then, and only the last step comes after.</p>
+          <ol class="roadmap">
+            <li class="milestone milestone-done">
+              <p class="milestone-name">Design <span class="state">Done</span></p>
+              <p>The design, its glossary, five decision records and a
+                dated landscape.</p>
+            </li>
+            <li class="milestone milestone-done">
+              <p class="milestone-name">M0 · Skeleton <span class="state">Done</span></p>
+              <p>The project with CI
+                (<a href="https://github.com/mvasin/forgecrew/pull/12">#12</a>),
+                the forge interface with fake and GitHub adapters
+                (<a href="https://github.com/mvasin/forgecrew/pull/14">#14</a>)
+                and the sandbox experiment
+                (<a href="https://github.com/mvasin/forgecrew/pull/15">#15</a>).</p>
+            </li>
+            <li class="milestone">
+              <p class="milestone-name">M1 · Review lane <span class="state">Next</span></p>
+              <p><code>review-bot</code> can block a merge. Groundwork
+                merged: the GitHub App manifests
+                (<a href="https://github.com/mvasin/forgecrew/pull/13">#13</a>).</p>
+            </li>
+            <li class="milestone">
+              <p class="milestone-name">M2 · Author <span class="state">Planned</span></p>
+              <p><code>dev-bot</code> takes an issue from a mention to your
+                approval.</p>
+            </li>
+            <li class="milestone milestone-launch">
+              <p class="milestone-name">M3 · Robustness <span class="state">Planned</span> <span class="flag">Launch</span></p>
+              <p>Retries, deadlines, stall detection and the quota
+                reserve.</p>
+            </li>
+            <li class="milestone milestone-later">
+              <p class="milestone-name">After launch <span class="state">Later</span></p>
+              <p>A QA role, an escalation role, evaluations, Azure DevOps,
+                GitLab and other agents.</p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="faq" class="section" aria-labelledby="faq-title">
+        <div class="container container-narrow">
+          <p class="eyebrow">FAQ</p>
+          <h2 id="faq-title">Questions</h2>
+          <div class="faq">
+            <details open>
+              <summary>Can I use Forgecrew today?</summary>
+              <p>Not yet. The design is settled and the first milestone, the
+                skeleton, is done, but nothing works end to end. The
+                <a href="#roadmap">roadmap</a> shows what is merged. Star or
+                watch the repository to follow along.</p>
+            </details>
+            <details>
+              <summary>What is Forgecrew, and what is it not?</summary>
+              <p>It is everything around the AI agent: the identities, the
+                sandboxes, the review gate, the rules, and the programs that
+                decide which role has work. It is not a model and not a
+                coding agent; it runs Claude Code, unmodified. It is not a
+                hosted service. And it does not replace your judgement: it
+                makes sure a change has passed an independent review before
+                it asks for yours.</p>
+            </details>
+            <details>
+              <summary>What does it cost?</summary>
+              <p>Forgecrew is free and needs no account. You pay for model
+                usage, through your subscription or an API key, and for the
+                machine it runs on.</p>
+            </details>
+            <details>
+              <summary>Can I use my Claude subscription?</summary>
+              <p>Anthropic permits signing in to the unmodified Claude Code
+                program with your own subscription, which is what Forgecrew
+                does. Its terms also say that Pro and Max limits assume
+                ordinary, individual use, and that products built on its
+                Agent SDK must use API keys. Forgecrew never relays one
+                person’s subscription to another. Read the
+                <a href="https://code.claude.com/docs/en/legal-and-compliance">current
+                terms</a>, and choose your subscription or an API key with
+                them in view.</p>
+            </details>
+            <details>
+              <summary>Which forges and agents does it support?</summary>
+              <p>GitHub and Claude Code at launch. Azure DevOps, GitLab and
+                other agents come after launch; the design already covers
+                all three forges.</p>
+            </details>
+            <details>
+              <summary>What if someone writes instructions into an
+                issue?</summary>
+              <p>Forgecrew limits what a misled agent can do rather than
+                promising it cannot be misled. Only people you allow can start
+                work, and pull requests from forks are never picked up
+                automatically. An agent holds no GitHub credential and reaches
+                no network but its model provider, and everything it wants to
+                post passes rules that reject, for example, text containing a
+                secret.</p>
+            </details>
+            <details>
+              <summary>What is not solved yet?</summary>
+              <p>The sandbox experiment in
+                <a href="https://github.com/mvasin/forgecrew/pull/15">#15</a>
+                ran Claude Code headless with its network limited to the model
+                API and its token kept out of every command line and file. One
+                leak is open: a program the agent starts can read the token
+                from the agent’s environment. The planned fix adds the
+                credential at the network boundary instead
+                (<a href="https://github.com/mvasin/forgecrew/issues/7">#7</a>).
+                Until then, Forgecrew treats anything the agent runs as able to
+                read that token.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p class="footer-brand"><img src="favicon.svg" alt="" width="20" height="20"> Forgecrew</p>
+        <p>In development and not usable yet. Status on 7 October 2026.</p>
+        <p><a href="https://github.com/mvasin/forgecrew">Source on GitHub</a>
+          · <a href="https://github.com/mvasin/forgecrew/blob/main/LICENSE">Apache-2.0
+          license</a> · <a href="https://github.com/mvasin/forgecrew/blob/main/docs/design.md">Design</a></p>
+        <p>This page uses no scripts, cookies, trackers or web fonts.</p>
+      </div>
+    </footer>
+  </body>
+</html>
