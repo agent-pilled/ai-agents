@@ -35,7 +35,8 @@ pnpm check      # everything CI runs
 - `src/adapters` holds one directory per seam: `forge`, `harness`, `keychain`
   and `isolation`. Configuration will select the adapter for each seam.
 - `test` holds the tests, outside `src` so that a test can wire the core to an
-  adapter, such as the fake forge.
+  adapter, such as the fake forge. `test/forge/contract.test.ts` specifies the
+  forge port, and every forge adapter must pass it.
 
 `dependency-cruiser` enforces the first rule, locally with `pnpm deps` and in
 CI. Relative imports spell out the `.ts` extension, so Node can run the source
