@@ -198,6 +198,31 @@ In a lane's checkout, the dispatcher replaces the repository's agent
 instruction files (`AGENTS.md`, `CLAUDE.md`) with the base branch's versions.
 Changes to them reach the lane only as diff. A pass dies with its dispatcher.
 
+### Harness sign-in
+
+A box signs in to its model provider in a way the harness vendor permits for
+unattended use. Every box definition supports two paths:
+
+- **Subscription:** the operator signs in through the vendor's own flow, one
+  sign-in per role, held in that role's keychain account. For Claude Code this
+  is a long-lived token from `claude setup-token`.
+- **API key:** billed to the key's owner, and required for anything built on a
+  vendor's agent SDK.
+
+Anthropic permits signing in to the unmodified Claude Code binary with one's own
+subscription, including where a platform hosts it. It requires API keys for
+products built on the Agent SDK, forbids developers to collect, store or
+intermediate Claude account credentials, and states that Pro and Max limits
+assume ordinary, individual usage
+([terms](https://code.claude.com/docs/en/legal-and-compliance)). A Claude box
+therefore drives the unmodified CLI, never the Agent SDK. Forgecrew never
+relays one person's subscription to another; each operator chooses a path with
+those terms in view. Other harnesses get the same check before their box
+definitions ship.
+
+Until credentials are injected at egress, the model credential enters the
+sandbox as the harness's environment, and the secret-leak filter covers it.
+
 ### Credentials
 
 Each role has its own keychain-backend account. Accounts may share vaults under
@@ -324,7 +349,7 @@ of scope.
 | Seam | Shape |
 | --- | --- |
 | forge | a domain-level port (discover, read change, claim, verdict, finding, publish, ready, merge); GitHub first, then Azure DevOps, GitLab later |
-| harness | a box definition as data (command, environment, model, effort) plus a small parser per harness family for activity and token spend |
+| harness | a box definition as data (command, environment, model, effort, sign-in path) plus a small parser per harness family for activity and token spend |
 | keychain backend | list and get |
 | isolation | start, mount, kill, and the broker's transport; bwrap with a Unix socket first |
 
