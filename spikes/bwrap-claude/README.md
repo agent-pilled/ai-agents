@@ -251,6 +251,8 @@ Node.js 24.21.0 and the native Claude Code 2.1.291 binary.
 | 4 | `argv[0]` fix (`2c56862`) | the same placeholder | off | the same |
 | 5 | `argv[0]` fix (`054506d`, the same kit code rebased) | a real token from `claude setup-token` | on | answered `pong` in one turn, 1148 ms, exit 0 |
 | 6 | review fixes (`a3d04a1`) | the same placeholder | on | `401 Invalid bearer token`, exit 1 |
+| 7 | launcher probes, launch unchanged (`50b23d1`) | the same placeholder | on | the same |
+| 8 | `env -i` and `--as-pid-1` (`c45e332`) | the same placeholder | on | the same |
 
 Each kit version is the head of this pull request at the time of the run; the
 pull request's history keeps each SHA. The real token reached a mode-600 file
@@ -259,7 +261,9 @@ run 5. Run 5 was not repeated without the scrub, because runs 1 to 4 already
 isolate the scrub's effects and every run spends the subscription. The review
 fixes could not change a conclusion of run 5, so it was not repeated either;
 [What the runs changed in the kit](#what-the-runs-changed-in-the-kit) says
-why.
+why. Runs 7 and 8 test what bwrap's own process exposes inside the sandbox.
+They need no real token, because `run.sh` never exports the token or passes it
+as an argument (finding 4).
 
 ### What worked
 
@@ -292,9 +296,11 @@ denied CONNECT to `example.com:443` before the harness starts.
 
 ### Probes
 
-Every probe had the same outcome in every run, except
-`proc-host-processes-invisible` in runs 1 and 2, which the first kit version
-misjudged (see [What the runs changed in the kit](#what-the-runs-changed-in-the-kit)).
+Every probe had the same outcome in every run, with two exceptions. The first
+kit version misjudged `proc-host-processes-invisible` in runs 1 and 2 (see
+[What the runs changed in the kit](#what-the-runs-changed-in-the-kit)). The
+two launcher probes exist from run 7: they failed there and passed in run 8
+(finding 4).
 
 | Probe | Outcome | Detail |
 | --- | --- | --- |
@@ -313,14 +319,16 @@ misjudged (see [What the runs changed in the kit](#what-the-runs-changed-in-the-
 | `fs-writes-refused` | pass | `/`, `/usr`, `/etc`, `/opt/forgecrew/*` and `/run/forgecrew/*` refuse writes |
 | `fs-writes-accepted` | pass | HOME, `/tmp`, `/workspace` and `/out` accept writes |
 | `env-host-absent` | pass | `HOME`, `LANG`, `LOGNAME`, `PATH`, `PWD`, `SHELL`, `SHLVL`, `TMPDIR`, `USER`, `_` |
-| `proc-host-processes-invisible` | pass | `bwrap` (PID 1), the entry `bash`, two `node` |
+| `proc-host-processes-invisible` | pass | up to run 7: `bwrap` (PID 1), the entry `bash`, two `node`; run 8: the entry `bash` (PID 1), two `node` |
+| `proc-launcher-env-absent` | **fail** in run 7, pass in run 8 | run 7: `FORGECREW_LAUNCH_CANARY is in the environment of 1 (bwrap)`; run 8: absent from all 3 readable environments |
+| `proc-launcher-argv-absent` | **fail** in run 7, pass in run 8 | run 7: bwrap's arguments in `/proc/1/cmdline`; run 8: no visible process carries them |
 | `proc-no-capabilities` | pass | `CapEff` all zero |
 | `proc-entry-fds-clean` | pass | descriptors 0, 1, 2 and 255 (bash's script) |
 | `token-absent-from-sandbox-argv` | pass | 9 to 13 samples per run |
 | `token-in-harness-environ` | info | present |
 | `hook-env-names` | info | see finding 3 |
 | `hook-env-token-absent` | pass | `CLAUDE_CODE_OAUTH_TOKEN` is not in the hook's environment |
-| `hook-harness-environ-unreadable` | **fail** | the hook read the token in `/proc/PID/environ` of `claude`; in run 6, `claude`'s was the only one of 7 readable environments to hold it |
+| `hook-harness-environ-unreadable` | **fail** | the hook read the token in `/proc/PID/environ` of `claude`; it was the only one of 7 readable environments to hold it in run 6, and of 6 in run 8 |
 | `token-absent-from-host-argv` | pass | 11 to 14 samples of every host process per run |
 | `token-absent-from-outputs` | pass | no output file holds the token |
 | `token-absent-from-home` | pass | HOME, `/tmp` and the workspace hold no copy |
@@ -390,6 +398,25 @@ an empty `inline-comments-buffer.jsonl`. The workspace is covered in finding 2.
    `ENABLE_CLAUDEAI_MCP_SERVERS`, `HOME`, `HTTPS_PROXY`, `HTTP_PROXY`, `LANG`,
    `LOGNAME`, `NoDefaultCurrentDirectoryInExePath`, `PATH`, `PWD`, `SHELL`,
    `SHLVL`, `TMPDIR` and `USER`.
+4. **bwrap's own process exposed the launcher's environment and arguments.**
+   Without `--as-pid-1`, bwrap leaves a reaper as PID 1 inside the sandbox.
+   That reaper keeps the environment and the command line bwrap was started
+   with. In run 7, `run.sh` exported a canary variable, and the probes found it
+   in `/proc/1/environ`, with bwrap's arguments in `/proc/1/cmdline`.
+   `--clearenv` does not cover this. Runs 1 to 6 had the same exposure: any
+   process in the sandbox could read the operator's exported environment and
+   bwrap's command line. The token was not part of either. `run.sh` keeps the
+   token in an unexported variable and passes it on descriptor 3, and
+   `token-absent-from-sandbox-argv` read the reaper's command line in every
+   run. Run 8 starts bwrap through `env -i` and with `--as-pid-1`. The canary
+   was then absent from all 3 readable environments, no process carried
+   bwrap's arguments, and the harness behaved as before. **M1's dispatcher must
+   launch bwrap the same way**, with an empty environment and no bwrap process
+   left in the sandbox's PID namespace, because the dispatcher's environment
+   may hold forge credentials. The fix hides the launcher's environment and
+   arguments, not the host's layout: `/proc/self/mountinfo` still shows the
+   host source path of every bind mount, and the probe configuration names the
+   host user's HOME, so M1 should not count on the sandbox hiding host paths.
 
 ### What the runs changed in the kit
 
@@ -412,12 +439,33 @@ The review of this pull request led to the version of run 6:
 - the argv samplers name each process once, not once per sample;
 - staged-leak tests now cover the eight probes in the shell scripts.
 
-None of this changes a conclusion of runs 1 to 5. Every run reported all 26
-probes. A scan of the same directories with a dummy pattern shows that grep
+None of this changes a conclusion of runs 1 to 5. Each of runs 1 to 6 reported
+all 26 probes the kit then had. A scan of the same directories with a dummy pattern shows that grep
 read every file in runs 1 to 5 without an error, and the hook's ancestor walk
 had reached `claude`. A copy of run 6 with the hook's results removed
 summarizes as `22 pass, 3 fail (3 missing), 1 info`, where the earlier
 summary would have shown `22 pass, 0 fail, 1 info`.
+
+The second review led to the versions of runs 7 and 8:
+
+- two probes, `proc-launcher-env-absent` and `proc-launcher-argv-absent`,
+  check what bwrap's own process exposes inside; run 7 found finding 4, and
+  run 8 shows the fix;
+- `run.sh` starts bwrap through `env -i` and with `--as-pid-1`;
+- the entry script finds its directory without starting a process, so nothing
+  runs while descriptor 3 still holds the token;
+- the summary quotes the harness's text and the kit's logs only when the
+  outputs scan passed, because it is written after that scan.
+
+Runs 7 and 8 reported all 28 probes.
+
+Later fixes change neither a probe nor the launch, so no run was repeated.
+`run.sh` removes the export attribute from its token variable, in case the
+caller had exported a variable named `token`. The summary takes its decision
+to quote file content from `host/probes.jsonl` only. And neither the summary
+nor the runner follows a symbolic link or reads anything but a regular file in
+a directory the sandbox can write, while the summary replaces control
+characters.
 
 ### Verdict
 
@@ -425,7 +473,11 @@ bwrap with a Unix socket bridge is good enough for the M1 sandbox. It runs the
 unmodified Claude Code binary headless with a `claude setup-token` sign-in and
 a fresh HOME. It confines the harness's network to the proxy's allowlist,
 which needs only `api.anthropic.com:443`, and it keeps the token off every
-command line and out of every file. Two findings carry into M1: the token
+command line and out of every file. Four findings carry into M1. The token
 stays readable through `/proc` until egress injection
-([#7](https://github.com/mvasin/forgecrew/issues/7)), and the scrub's
-placeholder files must be cleaned or the scrub dropped.
+([#7](https://github.com/mvasin/forgecrew/issues/7)). The scrub's
+placeholder files must be cleaned, or the scrub dropped. The dispatcher
+must start bwrap with an empty environment and `--as-pid-1`, or the
+sandbox can read the dispatcher's environment and bwrap's arguments. And
+the dispatcher must never follow a link, or read anything but a regular file,
+in a directory a pass can write.
