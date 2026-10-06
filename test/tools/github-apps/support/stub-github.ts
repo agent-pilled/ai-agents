@@ -40,6 +40,8 @@ export interface ConversionAnswer {
   readonly status: number;
   /** Sent as JSON unless it is a string, which is sent as it is. */
   readonly body: unknown;
+  /** How long to wait before answering. */
+  readonly delayMs?: number;
 }
 
 export interface StubGithub {
@@ -51,7 +53,13 @@ export interface StubGithub {
 
 export interface StubOptions {
   /** Defaults to GitHub's behaviour: a code converts once, then is unknown. */
-  readonly conversion?: (code: string) => ConversionAnswer | "hang";
+  /**
+   * "hang" never answers; "drop" closes the connection without an answer, as a
+   * network failure would.
+   */
+  readonly conversion?: (
+    code: string,
+  ) => ConversionAnswer | "hang" | "drop" | Promise<ConversionAnswer | "drop">;
 }
 
 export function fakeConversionBody(): Record<string, unknown> {
@@ -94,12 +102,18 @@ export async function startStubGithub(
 
       const match = /^\/app-manifests\/([^/]+)\/conversions$/.exec(path);
       if (request.method === "POST" && match) {
-        const answer = conversion(decodeURIComponent(match[1] as string));
-        if (answer === "hang") {
-          hanging.push(response);
-          return;
-        }
-        respond(response, answer);
+        const code = decodeURIComponent(match[1] as string);
+        void Promise.resolve(conversion(code)).then((answer) => {
+          if (answer === "hang") {
+            hanging.push(response);
+            return;
+          }
+          if (answer === "drop") {
+            response.destroy();
+            return;
+          }
+          setTimeout(() => respond(response, answer), answer.delayMs ?? 0);
+        });
         return;
       }
       if (
