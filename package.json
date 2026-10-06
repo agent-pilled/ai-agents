@@ -10,13 +10,18 @@
   },
   "packageManager": "pnpm@12.9.1",
   "scripts": {
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm deps",
     "lint": "biome check --error-on-warnings .",
     "fix": "biome check --write .",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "test": "vitest run",
+    "deps": "depcruise src --config"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
     "@types/node": "^24.19.1",
-    "typescript": "~6.0.3"
+    "dependency-cruiser": "18.5.0",
+    "typescript": "~6.0.3",
+    "vitest": "5.0.3"
   }
 }
