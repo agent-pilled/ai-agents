@@ -243,16 +243,23 @@ All runs took place on 2026-10-06 on an Ubuntu 26.04.1 LTS VM with kernel
 7.0.0, unprivileged user namespaces enabled, bubblewrap 0.11.1, bash 5.3.9,
 Node.js 24.21.0 and the native Claude Code 2.1.291 binary.
 
-| Run | Token | `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` | Harness |
-| --- | --- | --- | --- |
-| 1 | random 60-character placeholder | on | `401 Invalid bearer token` after two retries, exit 1 |
-| 2 | the same placeholder | off (`--no-scrub`) | the same |
-| 3 | a real token from `claude setup-token` | on | answered `pong` in one turn, 1148 ms, exit 0 |
+| Run | Kit version | Token | `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` | Harness |
+| --- | --- | --- | --- | --- |
+| 1 | first (`31d2366`) | random 60-character placeholder | on | `401 Invalid bearer token` after two retries, exit 1 |
+| 2 | first (`31d2366`) | the same placeholder | off (`--no-scrub`) | the same |
+| 3 | `argv[0]` fix (`2c56862`) | the same placeholder | on | the same |
+| 4 | `argv[0]` fix (`2c56862`) | the same placeholder | off | the same |
+| 5 | `argv[0]` fix (`054506d`, the same kit code rebased) | a real token from `claude setup-token` | on | answered `pong` in one turn, 1148 ms, exit 0 |
+| 6 | review fixes (`a3d04a1`) | the same placeholder | on | `401 Invalid bearer token`, exit 1 |
 
-The real token reached a mode-600 file without passing through an argument or
-the terminal, and was deleted after the run. The real-token run was not repeated without
-the scrub: runs 1 and 2 already isolate the scrub's effects, and every run
-spends the subscription.
+Each kit version is the head of this pull request at the time of the run; the
+pull request's history keeps each SHA. The real token reached a mode-600 file
+without passing through an argument or the terminal, and was deleted after
+run 5. Run 5 was not repeated without the scrub, because runs 1 to 4 already
+isolate the scrub's effects and every run spends the subscription. The review
+fixes could not change a conclusion of run 5, so it was not repeated either;
+[What the runs changed in the kit](#what-the-runs-changed-in-the-kit) says
+why.
 
 ### What worked
 
@@ -272,17 +279,22 @@ spends the subscription.
 
 ### Hosts contacted
 
-`api.anthropic.com:443` only, in every run. The proxy denied nothing while the
-harness ran, so a session signed in with a `claude setup-token` token needed
-no other host: no OAuth refresh on `platform.claude.com`, no telemetry, no
-update check. With the real token the harness opened three tunnels: two short
+Through the proxy, the harness asked for `api.anthropic.com:443` only, in
+every run. The proxy denied nothing while the harness ran, so a session signed
+in with a `claude setup-token` token needed no other host to answer: nothing
+went through the proxy for OAuth refresh on `platform.claude.com`, telemetry or
+an update check. A connection that bypassed `HTTPS_PROXY` would have failed in
+the empty network namespace without a trace in the kit's logs, so the logs
+cannot rule such an attempt out. With the real token the harness opened three tunnels: two short
 exchanges of about 2 KB up and 5 KB down each, then the model request with
 52 KB up and 6.5 KB down. The probes add one CONNECT to the same host and one
 denied CONNECT to `example.com:443` before the harness starts.
 
 ### Probes
 
-Every probe had the same outcome in all three runs.
+Every probe had the same outcome in every run, except
+`proc-host-processes-invisible` in runs 1 and 2, which the first kit version
+misjudged (see [What the runs changed in the kit](#what-the-runs-changed-in-the-kit)).
 
 | Probe | Outcome | Detail |
 | --- | --- | --- |
@@ -308,7 +320,7 @@ Every probe had the same outcome in all three runs.
 | `token-in-harness-environ` | info | present |
 | `hook-env-names` | info | see finding 3 |
 | `hook-env-token-absent` | pass | `CLAUDE_CODE_OAUTH_TOKEN` is not in the hook's environment |
-| `hook-harness-environ-unreadable` | **fail** | the hook read the token in `/proc/PID/environ` of `claude` |
+| `hook-harness-environ-unreadable` | **fail** | the hook read the token in `/proc/PID/environ` of `claude`; in run 6, `claude`'s was the only one of 7 readable environments to hold it |
 | `token-absent-from-host-argv` | pass | 11 to 14 samples of every host process per run |
 | `token-absent-from-outputs` | pass | no output file holds the token |
 | `token-absent-from-home` | pass | HOME, `/tmp` and the workspace hold no copy |
@@ -344,7 +356,9 @@ an empty `inline-comments-buffer.jsonl`. The workspace is covered in finding 2.
 1. **A subprocess of the harness can read the model credential.** The
    SessionStart hook read `CLAUDE_CODE_OAUTH_TOKEN` from the harness's
    `/proc/PID/environ` in every run, the real-token run included, with and
-   without `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`. Claude Code never puts the
+   without `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`. Runs 1 to 5 walked the hook's
+   ancestors; run 6 read every environment the hook could see, and the
+   harness's was the only one of 7 that held the token. Claude Code never puts the
    token in the hook's own environment, even without the scrub, but the
    parent's environment stays readable to any process of the same user in the
    same PID namespace. A Bash tool command could likely do the same; the docs
@@ -379,11 +393,31 @@ an empty `inline-comments-buffer.jsonl`. The workspace is covered in finding 2.
 
 ### What the runs changed in the kit
 
-`proc-host-processes-invisible` failed at first on the kit's own Node
+`proc-host-processes-invisible` failed in runs 1 and 2 on the kit's own Node
 processes: Node 24 names its main thread `MainThread`, and the kernel reports
-that as the process name. The probe now names each process by its `argv[0]`.
-The summary now also lists the workspace, where the scrub's placeholder files
-appeared. The real-token run exposed no further defect.
+that as the process name. From run 3 the probe names each process by its
+`argv[0]`, and the summary also lists the workspace, where the scrub's
+placeholder files appeared. Run 5 exposed no further defect.
+
+The review of this pull request led to the version of run 6:
+
+- the summary counts an expected probe that reported nothing as a failure, and
+  shows the kit's own logs when they are not empty;
+- one in-sandbox probe that throws fails under its own name instead of
+  dropping every result, and results are written as each probe finishes;
+- `hook-harness-environ-unreadable` reads every `/proc/PID/environ` the hook
+  can see, not only its ancestors', so a subprocess in its own PID namespace
+  or a reparented one cannot pass by missing the harness;
+- the two file scans fail when grep cannot read a file, instead of passing;
+- the argv samplers name each process once, not once per sample;
+- staged-leak tests now cover the eight probes in the shell scripts.
+
+None of this changes a conclusion of runs 1 to 5. Every run reported all 26
+probes. A scan of the same directories with a dummy pattern shows that grep
+read every file in runs 1 to 5 without an error, and the hook's ancestor walk
+had reached `claude`. A copy of run 6 with the hook's results removed
+summarizes as `22 pass, 3 fail (3 missing), 1 info`, where the earlier
+summary would have shown `22 pass, 0 fail, 1 info`.
 
 ### Verdict
 
