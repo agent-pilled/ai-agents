@@ -24,14 +24,16 @@ describe("the dependency rule", () => {
       `,
       "src/adapters/forge/example.ts": `
         import { join } from "node:path";
+        import { sdk } from "@octokit/rest";
         import type { Example } from "../../core/ports/example.ts";
-        export const example: Example = { name: join("a", "b") };
+        export const example: Example = { name: join("a", sdk.name) };
       `,
       "src/main.ts": `
         import { example } from "./adapters/forge/example.ts";
         import type { Alias } from "./core/domain/uses-port.ts";
         export const wired: Alias = example;
       `,
+      ...sdkPackage("@octokit/rest"),
     });
 
     expect(violations).toEqual([]);
@@ -92,6 +94,50 @@ describe("the dependency rule", () => {
         severity: "error",
         from: "src/core/domain/typo.ts",
         to: "../../adapters/forge/adaptor.ts",
+      },
+    ]);
+  });
+
+  it.each(forgeSdkImports)(
+    "rejects a core module with $kind of the forge SDK $name",
+    async ({ name, source }) => {
+      const violations = await cruiseTree({
+        "src/core/ports/uses-sdk.ts": source,
+        ...sdkPackage(name),
+      });
+
+      expect(violations).toEqual([
+        {
+          rule: "core-never-reaches-forge-sdk",
+          severity: "error",
+          from: "src/core/ports/uses-sdk.ts",
+          to: `node_modules/${name}/index.js`,
+          via: [`node_modules/${name}/index.js`],
+        },
+      ]);
+    },
+  );
+
+  it("rejects a core module that reaches a forge SDK through a module outside the core", async () => {
+    const violations = await cruiseTree({
+      "src/core/domain/uses.ts": `
+        import { client } from "../../app/github.ts";
+        export const used = client;
+      `,
+      "src/app/github.ts": `
+        import { sdk } from "@octokit/rest";
+        export const client = sdk;
+      `,
+      ...sdkPackage("@octokit/rest"),
+    });
+
+    expect(violations).toEqual([
+      {
+        rule: "core-never-reaches-forge-sdk",
+        severity: "error",
+        from: "src/core/domain/uses.ts",
+        to: "node_modules/@octokit/rest/index.js",
+        via: ["src/app/github.ts", "node_modules/@octokit/rest/index.js"],
       },
     ]);
   });
@@ -208,6 +254,46 @@ const coreReachesAnAdapterThrough: {
     ],
   },
 ];
+
+const forgeSdkImports = [
+  {
+    name: "@octokit/rest",
+    kind: "an import",
+    source: `import { sdk } from "@octokit/rest"; export const used = sdk;`,
+  },
+  {
+    name: "@octokit/app",
+    kind: "a type-only import",
+    source: `import type { Sdk } from "@octokit/app"; export type Used = Sdk;`,
+  },
+  {
+    name: "octokit",
+    kind: "an import",
+    source: `import { sdk } from "octokit"; export const used = sdk;`,
+  },
+  {
+    name: "@gitbeaker/rest",
+    kind: "an import",
+    source: `import { sdk } from "@gitbeaker/rest"; export const used = sdk;`,
+  },
+  {
+    name: "azure-devops-node-api",
+    kind: "an import",
+    source: `import { sdk } from "azure-devops-node-api"; export const used = sdk;`,
+  },
+];
+
+// A stand-in package under node_modules, so the import resolves and the
+// forge SDK rule, not the unresolvable rule, is what reports it.
+function sdkPackage(name: string): Record<string, string> {
+  return {
+    [`node_modules/${name}/package.json`]: JSON.stringify({
+      name,
+      main: "index.js",
+    }),
+    [`node_modules/${name}/index.js`]: `export const sdk = { name: "${name}" };`,
+  };
+}
 
 interface Violation {
   rule: string;

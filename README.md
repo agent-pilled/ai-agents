@@ -26,12 +26,12 @@ pnpm check      # everything CI runs
 | `pnpm lint`      | checks lint rules, formatting and import order    |
 | `pnpm fix`       | applies the formatting and safe lint fixes        |
 | `pnpm typecheck` | type-checks the code in strict mode               |
-| `pnpm deps`      | checks that the core never reaches an adapter     |
+| `pnpm deps`      | checks the core's import rules (below)            |
 
 ## Layout
 
-- `src/core` holds the domain and the ports. It never imports an adapter,
-  directly or through another module.
+- `src/core` holds the domain and the ports. It never imports an adapter or a
+  forge SDK such as Octokit, directly or through another module.
 - `src/adapters` holds one directory per seam: `forge`, `harness`, `keychain`
   and `isolation`. Configuration will select the adapter for each seam.
 - `test` holds the tests, outside `src` so that a test can wire the core to an
