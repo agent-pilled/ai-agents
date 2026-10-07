@@ -166,8 +166,13 @@ first-class option ([#9](https://github.com/mvasin/forgecrew/issues/9)).
   memorised solutions.
 - **Separation is not automatically good.** In a July 2026 preprint, one model
   reviewing another raised the pass rate from 71.6% to 89.7%, while the reverse
-  pairing lowered it from 91.4% to 82.8%. A fresh-context review by the same
-  model barely beat a single pass in another preprint.
+  pairing lowered it from 91.4% to 82.8%. In another preprint (revised October
+  2026), Claude Opus 4.6 reviewed its own 30 artifacts, which held 150 injected
+  errors. A fresh-session review scored an F1 of 28.6%, a single same-session
+  review 27.1% (two of three runs, since one run's records could not be
+  verified) and a second same-session review 21.7%. Averaged across runs, only
+  the lead over the second review was statistically significant. The paper says
+  it has not established whether a fresh session beats a single self-review.
 - **Multi-agent systems fail often.** The MAST taxonomy (2025) found failure
   rates of 41–87% across seven frameworks, with many verifier agents doing only
   superficial checks.
