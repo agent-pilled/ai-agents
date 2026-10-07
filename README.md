@@ -6,8 +6,13 @@ in its own sandbox. The forge and the host enforce the separation between
 roles, not instructions alone. GitHub comes first; Azure DevOps and GitLab
 follow.
 
-The project is at the design stage. [docs/design.md](docs/design.md) describes
-the design and [CONTEXT.md](CONTEXT.md) defines its terms.
+The project is in development and not usable yet.
+[docs/design.md](docs/design.md) describes the design and
+[CONTEXT.md](CONTEXT.md) defines its terms.
+
+The site at [mvasin.github.io/forgecrew](https://mvasin.github.io/forgecrew/)
+says what Forgecrew will do for you and where it stands; its source is in
+`site/`.
 
 ## Development
 
@@ -36,6 +41,8 @@ pnpm check      # everything CI runs
   and `isolation`. Configuration will select the adapter for each seam.
 - `tools` holds operator tooling that is not runtime code, such as the helper
   that registers the GitHub Apps ([docs/github-apps.md](docs/github-apps.md)).
+- `site` holds the project's landing page, plain HTML and CSS. Every push to
+  `main` that touches it deploys it to GitHub Pages.
 - `test` holds the tests, outside `src` so that a test can wire the core to an
   adapter, such as the fake forge. `test/forge/contract.test.ts` specifies the
   forge port, and every forge adapter must pass it.
