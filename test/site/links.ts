@@ -4,7 +4,7 @@ import { type HtmlElement, HtmlValidate, Parser } from "html-validate";
 // no file, or no element with the fragment's id. A link points into the site
 // when it resolves under the address GitHub Pages serves the site at.
 
-export const SITE_URL = "https://mvasin.github.io/forgecrew/";
+export const SITE_URL = "https://agents.agent-pilled.com/";
 
 export interface Site {
   /** Every file by its path from the site root, with the source of each HTML page. */

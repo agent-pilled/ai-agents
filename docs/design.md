@@ -1,4 +1,28 @@
-# Forgecrew design
+# Agent-Pilled AI Agents design
+
+## Product direction and current scope
+
+Agent-Pilled AI Agents is an open-source product for completing tasks through
+independent review. A planned Microsoft Teams integration starts work from a
+mention and returns the reviewed result to the conversation. Coding is the
+initial workflow; delivery reports, documents and other tasks are planned
+extensions. Teams and non-code workflows have not shipped. The project is not
+usable end to end yet.
+
+The author cannot accept its own work. Every review must refer to a specific
+result version, and revising that result requires fresh review. The coding
+workflow below implements this design around the exact commit. A document or
+report workflow will need its own version identity, review criteria, access
+controls and approval mechanism before it can enforce the same rule. The
+coding runtime's polling model and forge gates do not by themselves provide
+Teams conversation access or non-code review enforcement.
+
+Agent-Pilled is the company brand and can cover multiple products. Engineering
+Analytics is a future product direction. The repository is agent-pilled/ai-agents. The package and initial coding
+runtime retain the name Forgecrew; this positioning does not rename runtime
+components or implement new integrations.
+
+## Coding runtime
 
 Forgecrew is designed to turn issues into reviewed, merged changes across coding
 harnesses, with model and provider choice per role. Each delivery
@@ -423,7 +447,9 @@ the hard boundary from the first one and defer robustness:
 
 **After M3**, Forgecrew builds arbiter-bot, multiple instances, the evaluation
 harness, qa-bot for product repositories, Codex and Pi harness adapters, and the
-Azure DevOps adapter. Enterprise capabilities are a separate planned extension.
+Azure DevOps adapter. Teams integration and reviewed non-code workflows are
+planned product extensions with their own design and implementation work.
+Enterprise capabilities are a separate planned extension.
 
 ## Parked
 

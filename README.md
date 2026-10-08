@@ -1,18 +1,24 @@
-# Forgecrew
+# Agent-Pilled AI Agents
 
-Forgecrew is designed to take issues through implementation, independent review
-and merge across coding harnesses. Choose the tools for each delivery role while
-keeping the same controls: separate forge identities, fresh sandboxes and
-required verdicts on the exact commit. The forge and the host enforce role
-separation. GitHub comes first; Azure DevOps and GitLab follow.
+Open-source AI agents that complete tasks through independent review, with your
+choice of tools, models and providers. The planned interaction starts with a
+mention in Microsoft Teams and returns a reviewed result to the conversation.
+Coding is the first workflow; reports, documents and other work are planned.
 
-The project is in development and not usable yet.
-[docs/design.md](docs/design.md) describes the design and
-[CONTEXT.md](CONTEXT.md) defines its terms.
+**In development, not usable end to end.** Teams integration and non-code
+workflows have not shipped. The repository is **agent-pilled/ai-agents**; the initial coding runtime
+keeps the name **Forgecrew**. Its current technical design takes GitHub issues through
+implementation, independent review and merge, with separate forge identities,
+fresh sandboxes and required verdicts on the exact commit. The forge and host
+enforce role separation. Azure DevOps and GitLab remain future adapters.
 
-The site at [mvasin.github.io/forgecrew](https://mvasin.github.io/forgecrew/)
-says what Forgecrew will do for you and where it stands; its source is in
-`site/`.
+[docs/design.md](docs/design.md) records the product direction and the coding
+runtime design; [CONTEXT.md](CONTEXT.md) defines the runtime terms.
+
+The product site is [agents.agent-pilled.com](https://agents.agent-pilled.com/),
+with source in `site/`. [Agent-Pilled](https://agent-pilled.com/) is the company
+brand, with room for multiple products. Engineering Analytics is a future
+product direction, not an available product.
 
 ## Harness, model and provider choice
 
@@ -41,7 +47,7 @@ review and merge gates. Paid enterprise capabilities are planned for
 organization administration, audit and reporting, policy deployment and
 support; they have not shipped. Model usage and hosting are separate costs.
 
-Teams interested in a pilot can [open an issue](https://github.com/mvasin/forgecrew/issues/new)
+Teams interested in a pilot can [open an issue](https://github.com/agent-pilled/ai-agents/issues/new)
 with their workflow and deployment requirements.
 
 ## Development
@@ -71,8 +77,9 @@ pnpm check      # everything CI runs
   and `isolation`. Configuration will select the adapter for each seam.
 - `tools` holds operator tooling that is not runtime code, such as the helper
   that registers the GitHub Apps ([docs/github-apps.md](docs/github-apps.md)).
-- `site` holds the project's landing page, plain HTML and CSS. Every push to
-  `main` that touches it deploys it to GitHub Pages.
+- `site` holds the AI Agents landing page, plain HTML and CSS. Every push to
+  `main` that touches it deploys it to GitHub Pages at `agents.agent-pilled.com`.
+  The company homepage has a separate repository and Pages deployment.
 - `test` holds the tests, outside `src` so that a test can wire the core to an
   adapter, such as the fake forge. `test/forge/contract.test.ts` specifies the
   forge port, and every forge adapter must pass it.

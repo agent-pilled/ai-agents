@@ -3,19 +3,19 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Forgecrew: controlled AI delivery across coding harnesses</title>
-    <meta name="description" content="Controlled issue-to-merge AI delivery across coding harnesses, with separate role identities, fresh sandboxes and review gates on the exact commit.">
+    <title>Agent-Pilled AI Agents · Work with independent review</title>
+    <meta name="description" content="Open-source AI agents for coding and other work, with independent review. In development: a Teams mention starts the task, with your choice of tools, models and providers.">
     <meta name="color-scheme" content="light dark">
     <meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#161513" media="(prefers-color-scheme: dark)">
-    <link rel="canonical" href="https://mvasin.github.io/forgecrew/">
+    <link rel="canonical" href="https://agents.agent-pilled.com/">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="style.css">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Forgecrew">
-    <meta property="og:title" content="Forgecrew: controlled AI delivery across coding harnesses">
-    <meta property="og:description" content="Controlled issue-to-merge AI delivery across coding harnesses, with separate role identities, fresh sandboxes and review gates on the exact commit.">
-    <meta property="og:url" content="https://mvasin.github.io/forgecrew/">
+    <meta property="og:site_name" content="Agent-Pilled AI Agents">
+    <meta property="og:title" content="Agent-Pilled AI Agents · Work with independent review">
+    <meta property="og:description" content="Open-source AI agents for coding and other work, with independent review. Teams integration is planned; the first workflow is software delivery.">
+    <meta property="og:url" content="https://agents.agent-pilled.com/">
     <meta name="twitter:card" content="summary">
   </head>
   <body>
@@ -23,15 +23,15 @@
 
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="./"><img src="favicon.svg" alt="" width="28" height="28"> Forgecrew</a>
+        <a class="brand" href="./"><img src="favicon.svg" alt="" width="28" height="28"> AI Agents</a>
         <nav aria-label="Sections">
           <ul class="nav-list">
-            <li><a href="#how-it-works">How it works</a></li>
-            <li><a href="#harnesses">Harnesses</a></li>
-            <li><a href="#why">For teams</a></li>
-            <li><a href="#roadmap">Roadmap</a></li>
+            <li><a href="#how-it-works">Workflow</a></li>
+            <li><a href="#tools">Tools</a></li>
+            <li><a href="#roadmap">Status</a></li>
             <li><a href="#faq">FAQ</a></li>
-            <li><a class="nav-github" href="https://github.com/mvasin/forgecrew">GitHub</a></li>
+            <li><a href="https://agent-pilled.com/">Agent-Pilled</a></li>
+            <li><a class="nav-github" href="https://github.com/agent-pilled/ai-agents">GitHub</a></li>
           </ul>
         </nav>
       </div>
@@ -40,219 +40,188 @@
     <main id="main">
       <section class="hero" aria-labelledby="hero-title">
         <div class="container hero-inner">
-          <p class="eyebrow">Controlled AI delivery</p>
-          <h1 id="hero-title">From issue to merge, across coding harnesses.</h1>
-          <p class="lead">Forgecrew is designed to take an issue through
-            implementation, independent review and merge. Choose the harness,
-            model and provider for each role, with separate identities,
-            fresh sandboxes and your rules deciding what lands.</p>
+          <p class="eyebrow">AI Agents · By Agent-Pilled</p>
+          <h1 id="hero-title">AI agents for work that needs review.</h1>
+          <p class="lead">Open-source agents that complete tasks through
+            independent review. Being built for Microsoft Teams: mention an
+            agent, give it a task, and get a reviewed result using your chosen
+            tools, models and providers.</p>
           <div class="actions">
-            <a class="button button-primary" href="https://github.com/mvasin/forgecrew/issues/new">
-              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
-              Discuss a pilot</a>
-            <a class="button button-secondary" href="https://github.com/mvasin/forgecrew/blob/main/docs/design.md">Read the design</a>
+            <a class="button button-primary" href="https://github.com/agent-pilled/ai-agents/issues/new">Discuss a pilot</a>
+            <a class="button button-secondary" href="https://github.com/agent-pilled/ai-agents/blob/main/docs/design.md">Read the design</a>
           </div>
-          <p class="hero-meta">Free Apache-2.0 core · Self-hosted · GitHub first</p>
+          <p class="hero-meta">Free Apache-2.0 core · Independent review · Self-hosted</p>
         </div>
       </section>
 
       <section id="how-it-works" class="section" aria-labelledby="how-title">
         <div class="container">
-          <p class="eyebrow">How it works</p>
-          <h2 id="how-title">A delivery workflow with checks at every handoff</h2>
+          <p class="eyebrow">Planned workflow</p>
+          <h2 id="how-title">A task, a result, a separate review</h2>
           <figure class="flow" aria-labelledby="flow-caption">
             <ol class="flow-steps">
               <li class="flow-step">
-                <p class="flow-actor">Issue</p>
-                <p class="flow-title">You mention <code>@dev-bot</code></p>
-                <p class="flow-text">Only people you allow can start
-                  work.</p>
+                <p class="flow-actor">You</p>
+                <p class="flow-title">Mention an agent in Teams</p>
+                <p class="flow-text">Describe the task and the result you
+                  need. Only authorized people can start work.</p>
                 <span class="flow-arrow" aria-hidden="true"></span>
               </li>
               <li class="flow-step flow-bot">
-                <p class="flow-actor"><code>dev-bot</code></p>
-                <p class="flow-title">Writes the change</p>
-                <p class="flow-text">In a fresh sandbox, then opens a pull
-                  request.</p>
-                <p class="flow-identity">Own identity · own sandbox</p>
+                <p class="flow-actor">Author</p>
+                <p class="flow-title">Produces the work</p>
+                <p class="flow-text">Uses the context and tools it is
+                  permitted to access, in an isolated environment.</p>
+                <p class="flow-identity">Own credentials · own sandbox</p>
                 <span class="flow-arrow" aria-hidden="true"></span>
               </li>
               <li class="flow-step flow-bot">
-                <p class="flow-actor"><code>review-bot</code></p>
-                <p class="flow-title">Reviews the exact commit</p>
-                <p class="flow-text">Its verdict is a required check that
-                  only it can set.</p>
-                <p class="flow-identity">Own identity · own sandbox</p>
-                <p class="flow-loop"><span>Issues found? Back to
-                  <code>dev-bot</code>. Every new commit needs a new
-                  review.</span></p>
+                <p class="flow-actor">Reviewer</p>
+                <p class="flow-title">Checks that exact result</p>
+                <p class="flow-text">A separate agent checks the work against
+                  the task. The author cannot approve its own result.</p>
+                <p class="flow-identity">Own credentials · own sandbox</p>
+                <p class="flow-loop"><span>Findings go back to the author.
+                  A revised result needs a new review.</span></p>
                 <span class="flow-arrow flow-gate" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
               </li>
               <li class="flow-step flow-you">
                 <p class="flow-actor">You</p>
-                <p class="flow-title">Approve, and it merges</p>
-                <p class="flow-text">GitHub refuses the merge without the
-                  review, and without your approval where you require
-                  it.</p>
+                <p class="flow-title">Approve where required</p>
+                <p class="flow-text">Your rules decide which actions need
+                  your approval. The reviewed result returns to the thread.</p>
               </li>
             </ol>
-            <figcaption id="flow-caption">In the intended workflow, an issue goes to <code>dev-bot</code>,
-              its pull request to <code>review-bot</code>, and the merge waits
-              behind a gate for the review and, where you require it, for
-              you. Each bot is a
-              separate GitHub identity in a separate sandbox, so neither can
-              act as the other.</figcaption>
+            <figcaption id="flow-caption">Review belongs to a specific result:
+              the exact commit for a code change, or a version of a document
+              or report. Revising the work requires a fresh review.</figcaption>
           </figure>
         </div>
       </section>
 
-      <section id="harnesses" class="section section-alt" aria-labelledby="harnesses-title">
+      <section id="tools" class="section section-alt" aria-labelledby="tools-title">
         <div class="container">
-          <p class="eyebrow">Harness, model and provider choice</p>
-          <h2 id="harnesses-title">Choose the tools for each role</h2>
-          <p class="section-intro">The adapter path starts with Claude Code,
-            followed by planned Codex and Pi adapters. The choice has three
-            parts, while the delivery gates stay the same.</p>
+          <p class="eyebrow">Tools, models and providers</p>
+          <h2 id="tools-title">Choose what runs each role</h2>
+          <p class="section-intro">The first coding workflow targets Claude
+            Code. Codex and Pi adapters are planned. Changing the tools should
+            leave the role’s permissions and required reviews intact.</p>
           <ul class="cards cards-3">
             <li class="card">
-              <h3>Harness</h3>
-              <p>The coding-agent program that runs a role’s work: Claude Code
-                first, with Codex and <a href="https://pi.dev">Pi</a> to follow.
-                Each adapter must fit the same pass contract and sandbox
-                boundary.</p>
+              <h3>Agent tools</h3>
+              <p>The program that runs the agent, and the integrations it can
+                use. Claude Code is the first harness target, with Codex and
+                <a href="https://pi.dev">Pi</a> to follow. Teams and access to
+                non-code work are planned separately.</p>
             </li>
             <li class="card">
               <h3>Model</h3>
-              <p>The model doing the implementation or review. Configure it
-                per role: an author using Claude could have a reviewer using
-                an open-weight model through the planned Pi adapter.</p>
+              <p>Configure the model per role. An author and a reviewer could
+                use different models, including open-weight models through the
+                planned Pi adapter. Each combination needs evaluation.</p>
             </li>
             <li class="card">
               <h3>Provider</h3>
-              <p>The service or endpoint serving that model. Pi’s
-                multi-provider support is the planned path to hosted providers,
-                self-hosted models and supported custom endpoints.</p>
+              <p>Choose a supported service or endpoint for the model.
+                The planned Pi adapter provides a path to multiple hosted
+                providers and self-hosted models.</p>
             </li>
           </ul>
-          <p class="section-more">Mixed-role configurations are candidates to
-            evaluate, not proven quality improvements. Supported combinations
-            depend on the harness, adapter, provider and sign-in path; they
-            need not perform equally.</p>
+          <p class="section-more">Supported combinations will depend on the
+            adapter, provider and sign-in path. No model pairing has been
+            established as best.</p>
         </div>
       </section>
 
-      <section id="benefits" class="section" aria-labelledby="benefits-title">
+      <section id="work" class="section" aria-labelledby="work-title">
         <div class="container">
-          <p class="eyebrow">What you get</p>
-          <h2 id="benefits-title">Hand over the work, keep the judgement</h2>
-          <ul class="cards cards-4">
-            <li class="card">
-              <svg class="card-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="8" r="3"/><path d="M2.5 20c0-3.2 2.4-5.5 5.5-5.5s5.5 2.3 5.5 5.5"/><path d="M13.6 15.1c.9-.4 1.9-.6 2.9-.6 3.1 0 5.5 2.3 5.5 5.5"/></svg>
-              <h3>No agent approves its own work</h3>
-              <p>The author and the reviewer are separate GitHub identities
-                with separate keys and sandboxes. Neither can act as the
-                other.</p>
-            </li>
-            <li class="card">
-              <svg class="card-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l7.5 3v6c0 4.7-3.1 8-7.5 9.4-4.4-1.4-7.5-4.7-7.5-9.4v-6z"/><path d="M8.7 12.2l2.3 2.3 4.3-4.6"/></svg>
-              <h3>A review that can block the merge</h3>
-              <p>The review is a required check on the exact commit. A new
-                push clears it, and GitHub will not merge without it.</p>
-            </li>
-            <li class="card">
-              <svg class="card-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="7.5" r="4"/><path d="M2.5 21c0-4.3 3.3-7.5 7.5-7.5 1.2 0 2.3.3 3.3.7"/><path d="M14.5 18.5l2.3 2.3 4.7-5"/></svg>
-              <h3>You decide what merges</h3>
-              <p>You choose which changes need your approval, and changes to
-                the rules Forgecrew enforces always do. When a task cannot be
-                done as written, the agent can say so instead of faking
-                it.</p>
-            </li>
-            <li class="card">
-              <svg class="card-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3.5" width="18" height="7.5" rx="2"/><rect x="3" y="13" width="18" height="7.5" rx="2"/><path d="M7 7.25h.01M7 16.75h.01"/></svg>
-              <h3>Keep infrastructure in your control</h3>
-              <p>Open source and self-hosted, with nothing exposed to the
-                internet for incoming work. Provider credentials and forge
-                role credentials have separate purposes; choosing a provider
-                does not change a role’s authority.</p>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <section id="why" class="section section-alt" aria-labelledby="why-title">
-        <div class="container">
-          <p class="eyebrow">For teams</p>
-          <h2 id="why-title">Free core. Planned enterprise capabilities.</h2>
+          <p class="eyebrow">Initial scope and broader direction</p>
+          <h2 id="work-title">Start with software delivery. Extend to other work.</h2>
           <ul class="cards cards-3">
             <li class="card">
-              <h3>Safety gates in the free core</h3>
-              <p>The Apache-2.0 core stays free, including separate role
-                identities, sandbox isolation and exact-commit review and
-                merge gates.</p>
+              <h3>Code changes</h3>
+              <p>Take a GitHub issue through implementation, independent
+                review and merge, with review tied to the exact commit.</p>
             </li>
             <li class="card">
-              <h3>Operate across an organization</h3>
-              <p>Paid enterprise capabilities are planned for organization
-                administration, audit and reporting, policy deployment and
-                support. These capabilities have not shipped.</p>
+              <h3>Reports</h3>
+              <p>Assemble delivery reports from tickets and pull requests.
+                Review the report’s sources and conclusions before returning
+                it to the team.</p>
             </li>
             <li class="card">
-              <h3>Shape a pilot around your workflow</h3>
-              <p>Bring your repositories, approval rules and deployment
-                requirements. <a href="https://github.com/mvasin/forgecrew/issues/new">Open
-                a pilot discussion</a> to help define what your team needs.</p>
+              <h3>Documents and other tasks</h3>
+              <p>Produce documents and other results with a separate reviewer,
+                task-specific checks and your approval rules.</p>
             </li>
           </ul>
-          <p class="section-more">How Forgecrew compares with related tools,
-            with dates and sources:
-            <a href="https://github.com/mvasin/forgecrew/blob/main/docs/landscape.md">the
-            landscape</a>.</p>
+        </div>
+      </section>
+
+      <section id="enterprise" class="section section-alt" aria-labelledby="enterprise-title">
+        <div class="container">
+          <p class="eyebrow">Open source and enterprise</p>
+          <h2 id="enterprise-title">Free core. Planned paid enterprise capabilities.</h2>
+          <ul class="cards cards-3">
+            <li class="card">
+              <h3>Review controls in the free core</h3>
+              <p>The core stays free under Apache-2.0, including role
+                isolation and the review and approval gates. Model usage
+                and hosting are separate costs.</p>
+            </li>
+            <li class="card">
+              <h3>Self-hosted deployment</h3>
+              <p>Run the software on infrastructure you control. Credentials
+                for model access stay separate from each role’s credentials
+                for the systems it works in.</p>
+            </li>
+            <li class="card">
+              <h3>Organization capabilities</h3>
+              <p>Paid additions are planned for administration, audit and
+                reporting, policy deployment and support. </p>
+            </li>
+          </ul>
         </div>
       </section>
 
       <section id="roadmap" class="section" aria-labelledby="roadmap-title">
         <div class="container">
-          <p class="eyebrow">Roadmap</p>
-          <h2 id="roadmap-title">Where it stands</h2>
-          <p class="section-intro">As of 8 October 2026, the skeleton and
-            sandbox experiment are merged; Forgecrew is not yet usable end to
-            end. M1–M3 target the first GitHub workflow with Claude Code.
-            Codex, Pi and enterprise capabilities follow that core workflow.</p>
+          <p class="eyebrow">Development status</p>
+          <h2 id="roadmap-title">What exists, and what comes next</h2>
+          <p class="section-intro">The first GitHub workflow is in development.
+            Teams integration and other workflows follow. The source is in
+            <a href="https://github.com/agent-pilled/ai-agents">agent-pilled/ai-agents</a>;
+            the initial coding runtime uses the name Forgecrew.</p>
           <ol class="roadmap">
             <li class="milestone milestone-done">
               <p class="milestone-name">Design <span class="state">Done</span></p>
-              <p>The design, its glossary, five decision records and a
-                dated landscape.</p>
+              <p>A GitHub delivery design, glossary, decision records and
+                <a href="https://github.com/agent-pilled/ai-agents/blob/main/docs/landscape.md">dated research</a>.</p>
             </li>
             <li class="milestone milestone-done">
-              <p class="milestone-name">M0 · Skeleton <span class="state">Done</span></p>
-              <p>The project with CI
-                (<a href="https://github.com/mvasin/forgecrew/pull/12">#12</a>),
-                the forge interface with fake and GitHub adapters
-                (<a href="https://github.com/mvasin/forgecrew/pull/14">#14</a>)
-                and the sandbox experiment
-                (<a href="https://github.com/mvasin/forgecrew/pull/15">#15</a>).</p>
+              <p class="milestone-name">Runtime groundwork <span class="state">Done</span></p>
+              <p>CI, fake and GitHub forge adapters, GitHub App manifests and
+                a sandbox experiment.</p>
             </li>
             <li class="milestone">
-              <p class="milestone-name">M1 · Review lane <span class="state">Next</span></p>
-              <p><code>review-bot</code> can block a merge. Groundwork
-                merged: the GitHub App manifests
-                (<a href="https://github.com/mvasin/forgecrew/pull/13">#13</a>).</p>
-            </li>
-            <li class="milestone">
-              <p class="milestone-name">M2 · Author <span class="state">Planned</span></p>
-              <p><code>dev-bot</code> takes an issue from a mention to your
-                approval.</p>
-            </li>
-            <li class="milestone milestone-launch">
-              <p class="milestone-name">M3 · Robustness <span class="state">Planned</span> <span class="flag">Launch</span></p>
-              <p>Retries, deadlines, stall detection and capacity controls.</p>
+              <p class="milestone-name">GitHub delivery <span class="state">Next</span></p>
+              <p>Review gates, the author workflow, retries and capacity
+                controls. Claude Code is the first harness target.</p>
             </li>
             <li class="milestone milestone-later">
-              <p class="milestone-name">After launch <span class="state">Later</span></p>
-              <p>Codex and Pi adapters, open-weight model configurations,
-                a QA role, an escalation role, evaluations, Azure DevOps,
-                GitLab and enterprise capabilities.</p>
+              <p class="milestone-name">Microsoft Teams <span class="state">Planned</span></p>
+              <p>Start tasks by mention and return reviewed results to the
+                conversation, with appropriate access controls.</p>
+            </li>
+            <li class="milestone milestone-later">
+              <p class="milestone-name">More work and tools <span class="state">Planned</span></p>
+              <p>Reports and documents, Codex and Pi adapters, and review
+                controls for each supported kind of result.</p>
+            </li>
+            <li class="milestone milestone-later">
+              <p class="milestone-name">Enterprise <span class="state">Planned</span></p>
+              <p>Organization administration, audit, reporting, policy
+                deployment and support.</p>
             </li>
           </ol>
         </div>
@@ -264,52 +233,37 @@
           <h2 id="faq-title">Questions</h2>
           <div class="faq">
             <details>
-              <summary>What does Forgecrew add to a coding harness?</summary>
-              <p>The delivery workflow around each agent: role identities,
-                sandboxes, review gates and the rules that decide when work
-                can proceed. The harness does the coding or reviewing;
-                Forgecrew’s design keeps its authority within the role and
-                checks the required verdicts before merge.</p>
+              <summary>Can I use it in Microsoft Teams today?</summary>
+              <p>Teams integration is on the roadmap. The first release
+                focuses on GitHub software delivery. <a href="https://github.com/agent-pilled/ai-agents/issues/new">Discuss
+                a pilot</a> to help define your team’s requirements.</p>
+            </details>
+            <details>
+              <summary>Is this only for coding?</summary>
+              <p>Coding is the initial workflow. The product direction also
+                covers reports, documents and other tasks that can be checked
+                against a defined result. See the <a href="#roadmap">development status</a> for the
+                current scope and planned extensions.</p>
+            </details>
+            <details>
+              <summary>What makes the review independent?</summary>
+              <p>The author and reviewer have separate authority, credentials
+                and isolated environments. The coding design binds a required
+                review to the exact commit. The planned non-code workflows
+                must likewise bind review to the specific result version, so
+                a revision cannot keep an older acceptance.</p>
             </details>
             <details>
               <summary>What does it cost?</summary>
-              <p>The core is free under Apache-2.0. Model usage and the
-                machine it runs on are separate costs. The
-                <a href="https://github.com/mvasin/forgecrew/blob/main/docs/design.md#harness-sign-in">technical
-                design</a> covers supported subscription and API sign-in
-                paths; enterprise capabilities are planned as paid additions.</p>
+              <p>The core is free under Apache-2.0. Model usage and hosting
+                are separate costs. Enterprise capabilities are planned as
+                paid additions. The <a href="https://github.com/agent-pilled/ai-agents/blob/main/docs/design.md#harness-sign-in">technical
+                design</a> covers intended subscription and API sign-in paths.</p>
             </details>
             <details>
-              <summary>Can the author and reviewer use different models?</summary>
-              <p>That is part of the planned configuration per role. A
-                different model does not itself make a review independent:
-                the reviewer also needs its own forge identity, credential
-                boundary and sandbox. Model pairings need evaluation on your
-                work; no pairing has been established as best.</p>
-            </details>
-            <details>
-              <summary>What if someone writes instructions into an
-                issue?</summary>
-              <p>Forgecrew limits what a misled agent can do rather than
-                promising it cannot be misled. Only people you allow can start
-                work, and pull requests from forks are never picked up
-                automatically. An agent holds no GitHub credential and reaches
-                no network but its model provider, and everything it wants to
-                post passes rules that reject, for example, text containing a
-                secret.</p>
-            </details>
-            <details>
-              <summary>What is not solved yet?</summary>
-              <p>The sandbox experiment in
-                <a href="https://github.com/mvasin/forgecrew/pull/15">#15</a>
-                ran Claude Code headless with its network limited to the model
-                API and its token kept out of every command line and file. One
-                leak is open: a program the agent starts can read the token
-                from the agent’s environment. The planned fix adds the
-                credential at the network boundary instead
-                (<a href="https://github.com/mvasin/forgecrew/issues/7">#7</a>).
-                Until then, Forgecrew treats anything the agent runs as able to
-                read that token.</p>
+              <summary>Why does the runtime use the name Forgecrew?</summary>
+              <p>Forgecrew is the initial coding runtime name.
+                The product is Agent-Pilled AI Agents. </p>
             </details>
           </div>
         </div>
@@ -318,12 +272,8 @@
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <p class="footer-brand"><img src="favicon.svg" alt="" width="20" height="20"> Forgecrew</p>
-        <p>Controlled delivery. Choice for every role.</p>
-        <p><a href="https://github.com/mvasin/forgecrew">Source on GitHub</a>
-          · <a href="https://github.com/mvasin/forgecrew/blob/main/LICENSE">Apache-2.0
-          license</a> · <a href="https://github.com/mvasin/forgecrew/blob/main/docs/design.md">Design</a></p>
-        <p>This page uses no scripts, cookies, trackers or web fonts.</p>
+        <p class="footer-brand"><img src="favicon.svg" alt="" width="24" height="24"> AI Agents · By Agent-Pilled</p>
+        <p><a href="https://agent-pilled.com/">Company</a> · <a href="https://github.com/agent-pilled/ai-agents">Source on GitHub</a> · <a href="https://github.com/agent-pilled/ai-agents/blob/main/LICENSE">Apache-2.0</a></p>
       </div>
     </footer>
   </body>
