@@ -1,10 +1,10 @@
 # Forgecrew
 
-Forgecrew turns issues into reviewed, merged changes. Each delivery role, from
-the author to the code reviewer and QA, acts as its own forge identity and runs
-in its own sandbox. The forge and the host enforce the separation between
-roles, not instructions alone. GitHub comes first; Azure DevOps and GitLab
-follow.
+Forgecrew is designed to take issues through implementation, independent review
+and merge across coding harnesses. Choose the tools for each delivery role while
+keeping the same controls: separate forge identities, fresh sandboxes and
+required verdicts on the exact commit. The forge and the host enforce role
+separation. GitHub comes first; Azure DevOps and GitLab follow.
 
 The project is in development and not usable yet.
 [docs/design.md](docs/design.md) describes the design and
@@ -13,6 +13,36 @@ The project is in development and not usable yet.
 The site at [mvasin.github.io/forgecrew](https://mvasin.github.io/forgecrew/)
 says what Forgecrew will do for you and where it stands; its source is in
 `site/`.
+
+## Harness, model and provider choice
+
+These are separate choices, configured per role:
+
+- **Harness:** the coding-agent program that runs the pass. Claude Code is the
+  first target; Codex and [Pi](https://pi.dev) adapters are planned.
+- **Model:** the model used to implement or review a change, such as Claude or
+  an open-weight model.
+- **Provider:** the service or endpoint serving that model. The planned Pi
+  adapter is the path to multiple providers and self-hosted models through
+  supported custom endpoints.
+
+An illustrative planned pairing is a Claude Code author using Claude and a Pi
+reviewer using an open-weight model. That is a configuration to evaluate, not a
+proven quality claim. Supported combinations depend on the harness, adapter,
+provider and sign-in path; arbitrary combinations and equal performance are not
+promised. Provider credentials remain distinct from each role's forge
+credentials. [The design](docs/design.md#harness-model-and-provider-choice)
+describes the boundaries and sign-in paths.
+
+## Free core and enterprise plans
+
+The Apache-2.0 core stays free, including role isolation and the exact-head
+review and merge gates. Paid enterprise capabilities are planned for
+organization administration, audit and reporting, policy deployment and
+support; they have not shipped. Model usage and hosting are separate costs.
+
+Teams interested in a pilot can [open an issue](https://github.com/mvasin/forgecrew/issues/new)
+with their workflow and deployment requirements.
 
 ## Development
 

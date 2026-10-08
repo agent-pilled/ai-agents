@@ -1,7 +1,9 @@
 # Evaluations
 
-Evaluations compare configurations: harness, model, effort and skills inside the
-black box, and the structure around it (lanes, lenses, caps, deadlines). Every
+Evaluations compare configurations per role: harness, model, provider, effort
+and skills inside the black box, and the structure around it (lanes, lenses,
+caps, deadlines). A mixed author/reviewer configuration is a candidate to
+evaluate, not evidence that using different models improves quality. Every
 evaluation includes the baseline configuration, the black box with no skills,
 as its control arm. All evaluations run outside production and never write to a
 production forge.

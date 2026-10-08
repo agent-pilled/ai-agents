@@ -166,6 +166,20 @@ _Avoid_: skills (for enforced rules)
 A pass seen from the wireframe: one prompt in, one validated response out. What
 runs inside, including models and skills, is its configuration.
 
+**Harness**:
+The coding-agent program that runs a pass, such as Claude Code, Codex or Pi.
+It is distinct from the model it calls and the provider serving that model.
+_Avoid_: model (for the coding-agent program)
+
+**Model**:
+The model used by a pass to implement, review or test a change. Model choice is
+configuration per role; it does not confer forge authority.
+
+**Model provider**:
+The service or endpoint serving a model, including a self-hosted endpoint where
+the harness and adapter support it. Its credential authorizes model access and
+usage billing, not the role's forge identity.
+
 **Pass contract**:
 What the prompt gives a pass and what it must return: role brief, target,
 broker access and response schema in; a response that validates on receipt

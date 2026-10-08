@@ -1,6 +1,7 @@
 # Forgecrew design
 
-Forgecrew turns issues into reviewed, merged changes. Each delivery
+Forgecrew is designed to turn issues into reviewed, merged changes across coding
+harnesses, with model and provider choice per role. Each delivery
 role acts as its own forge identity, wakes on forge state, and is separated from
 the other roles by mechanisms the forge and the host enforce, not by
 instructions alone. The concepts hold on GitHub, Azure DevOps and GitLab; only
@@ -17,6 +18,9 @@ here, and [adr/](adr/) records the decisions a future reader would question.
   is enforced by deterministic code. Only judgement happens inside a pass.
 - **The forge is the state machine.** Everything that decides what is due is
   on the forge. Local state is derived from it and can be deleted.
+- **Configuration choice, fixed authority.** A role can change its harness,
+  model or provider without changing its forge identity, sandbox boundary or
+  required gates. Each supported configuration still needs validation.
 - **Bare baseline.** A pass starts with no skills. A skill enters a
   configuration only when an evaluation shows it beats the baseline.
 - **Outcomes from day one.** Every pass and change records what an evaluation
@@ -127,12 +131,36 @@ For each key, the dispatcher:
 
 ## Passes
 
+### Harness, model and provider choice
+
+The **harness** is the coding-agent program running the pass; the **model** is
+the model it calls; the **provider** serves that model through a service or
+endpoint. A box definition selects these per role within the combinations the
+harness and adapter support. Forge identity and authority belong to the role,
+not to a model or provider.
+
+Claude Code is the first harness target. Codex and Pi adapters are planned after
+the core workflow. [Pi](https://pi.dev) supports multiple providers, custom
+models and providers, and print/JSON, RPC and SDK integration modes
+([source and documentation](https://github.com/earendil-works/pi)). A Pi adapter
+is the intended path to open-weight models and self-hosted or other
+[compatible endpoints](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md).
+It must still satisfy the pass contract, activity reporting,
+credential isolation and network restrictions before it is supported.
+
+For example, a Claude Code author using Claude could be paired with a Pi
+reviewer using an open-weight model. This is an illustrative planned
+configuration, not an evaluated result. Neither arbitrary combinations nor
+equal quality are guaranteed; [evaluations](evals.md) compare configurations
+per role before adoption.
+
 ### Pass contract
 
 A pass is a black box: one prompt in, one validated response out. The prompt
 carries the whole contract: role brief, target change and head, broker address
 and pass token, and the response schema. The wireframe never names a skill.
-Whatever the box loads is its configuration: harness, model, effort and skills.
+Whatever the box loads is its configuration: harness, model, provider, effort
+and skills.
 
 Responses by role:
 
@@ -200,25 +228,27 @@ Changes to them reach the lane only as diff. A pass dies with its dispatcher.
 
 ### Harness sign-in
 
-A box signs in to its model provider in a way the harness vendor permits for
-unattended use. Every box definition supports two paths:
+A box signs in to its model provider through a path supported by its harness,
+adapter and provider for unattended use. A box definition declares which paths
+are available:
 
 - **Subscription:** the operator signs in through the vendor's own flow, one
   sign-in per role, held in that role's keychain account. For Claude Code this
   is a long-lived token from `claude setup-token`.
-- **API key:** billed to the key's owner, and required for anything built on a
-  vendor's agent SDK.
+- **API key:** usage billed to the key's owner under the provider's API terms.
 
-Anthropic permits signing in to the unmodified Claude Code binary with one's own
-subscription, including where a platform hosts it. It requires API keys for
-products built on the Agent SDK, forbids developers to collect, store or
-intermediate Claude account credentials, and states that Pro and Max limits
-assume ordinary, individual usage
-([terms](https://code.claude.com/docs/en/legal-and-compliance)). A Claude box
-therefore drives the unmodified CLI, never the Agent SDK. Forgecrew never
-relays one person's subscription to another; each operator chooses a path with
-those terms in view. Other harnesses get the same check before their box
-definitions ship.
+The first Claude Code box drives the unmodified CLI. Anthropic's
+[7 October 2026 update](https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan)
+says Claude Agent SDK, `claude -p` and third-party app usage can still draw from
+subscription limits. API-key use draws from a separate API balance, including
+eligible plans' [monthly API credits](https://support.claude.com/en/articles/17154008-monthly-api-credits-for-max-and-team-plans);
+those credits do not change subscription limits. An Agent SDK integration does
+not inherently require API-key billing under that update.
+
+Forgecrew never relays one person's subscription to another. Each operator
+chooses a supported sign-in path under the provider's current terms. This does
+not establish Claude subscription support through Pi or another harness; every
+adapter's sign-in paths need their own check before shipping.
 
 Until credentials are injected at egress, the model credential enters the
 sandbox as the harness's environment, and the secret-leak filter covers it.
@@ -230,6 +260,11 @@ one invariant: a vault readable by more than one role holds no credential that
 acts as any role, including the Accountable person. Each forge identity's key
 sits where only its role can read it. Each role runs in its own OS-level
 isolation unit; the deployment chooses the mechanism.
+
+Provider credentials authorize model access and usage billing. Forge
+credentials authorize the role's forge actions. They are separate capabilities:
+changing a model provider never changes a role's forge permissions, and the
+pass receives no forge identity credential.
 
 ## Failure handling
 
@@ -335,7 +370,12 @@ of scope.
 
 ## Project shape
 
-- Open source from the first commit, Apache-2.0.
+- Open source from the first commit, Apache-2.0. The core stays free, including
+  role isolation and exact-head review and merge gates.
+- Paid enterprise capabilities are planned for organization administration,
+  audit and reporting, policy deployment and support. They have not shipped;
+  this plan does not change the core's license or put its safety gates behind
+  a paid tier.
 - **Public:** runtime, protocol, documentation, configuration schema and
   examples, CI. **Private, per deployment:** instance configuration
   (identities, served repositories, read scopes, allowed actors, keychain
@@ -349,7 +389,7 @@ of scope.
 | Seam | Shape |
 | --- | --- |
 | forge | a domain-level port (discover, read change, claim, verdict, finding, publish, ready, merge); GitHub first, then Azure DevOps, GitLab later |
-| harness | a box definition as data (command, environment, model, effort, sign-in path) plus a small parser per harness family for activity and token spend |
+| harness | a box definition as data (command, environment, model, provider, effort, sign-in path) plus a small parser per harness family for activity and token spend |
 | keychain backend | list and get |
 | isolation | start, mount, kill, and the broker's transport; bwrap with a Unix socket first |
 
@@ -382,7 +422,8 @@ the hard boundary from the first one and defer robustness:
    gate, and the scheduler's priority and dependency holds.
 
 **After M3**, Forgecrew builds arbiter-bot, multiple instances, the evaluation
-harness, qa-bot for product repositories, and the Azure DevOps adapter.
+harness, qa-bot for product repositories, Codex and Pi harness adapters, and the
+Azure DevOps adapter. Enterprise capabilities are a separate planned extension.
 
 ## Parked
 
