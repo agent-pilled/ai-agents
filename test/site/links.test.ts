@@ -36,7 +36,7 @@ describe("brokenLinks", () => {
     const example = site({
       "index.html": `<!doctype html><html lang="en"><head><title>t</title>
         <link rel="stylesheet" href="style.css">
-        <link rel="icon" href="/forgecrew/favicon.svg">
+        <link rel="icon" href="/favicon.svg">
         <meta property="og:url" content="${SITE_URL}">
         <meta property="og:image" content="${SITE_URL}card.png">
         </head><body><h1 id="top-heading">t</h1>
@@ -47,7 +47,7 @@ describe("brokenLinks", () => {
         </body></html>`,
       "docs/guide.html": `<!doctype html><html lang="en"><head><title>g</title></head>
         <body><h1 id="install">i</h1><a href="../index.html#top-heading">back</a>
-        <a href="/forgecrew/">home</a></body></html>`,
+        <a href="/">home</a></body></html>`,
       "style.css": undefined,
       "favicon.svg": undefined,
       "card.png": undefined,
@@ -60,7 +60,7 @@ describe("brokenLinks", () => {
   it("reports a link to a file that does not exist", async () => {
     const example = site({
       "index.html": `<p><a href="missing.html">x</a></p>
-        <link rel="stylesheet" href="/forgecrew/missing.css">
+        <link rel="stylesheet" href="/missing.css">
         <meta property="og:image" content="${SITE_URL}missing.png">`,
     });
 
@@ -72,7 +72,7 @@ describe("brokenLinks", () => {
       },
       {
         page: "index.html",
-        link: "/forgecrew/missing.css",
+        link: "/missing.css",
         problem: "no file missing.css in the site",
       },
       {
@@ -180,9 +180,8 @@ describe("brokenLinks", () => {
 
   it("ignores links that leave the site", async () => {
     const example = site({
-      "index.html": `<a href="https://github.com/mvasin/forgecrew">repo</a>
-        <a href="https://mvasin.github.io/">another site on the same host</a>
-        <a href="/elsewhere/page.html">another path on the same host</a>
+      "index.html": `<a href="https://github.com/agent-pilled/ai-agents">repo</a>
+        <a href="https://agent-pilled.github.io/">external site</a>
         <a href="mailto:someone@example.test">mail</a>`,
     });
 

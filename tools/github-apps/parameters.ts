@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import { APP_KINDS, type AppKind } from "./manifests.ts";
 
 /** The project's public address, which GitHub requires as the App's homepage. */
-export const DEFAULT_HOMEPAGE_URL = "https://github.com/mvasin/forgecrew";
+export const DEFAULT_HOMEPAGE_URL = "https://github.com/agent-pilled/ai-agents";
 
 /** Raised for a parameter the operator can correct; the message says how. */
 export class ParameterError extends Error {}

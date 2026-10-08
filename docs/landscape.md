@@ -106,7 +106,7 @@ Sandboxes also run unmodified CLIs. They are candidates for remote adapters of
 the isolation port, with frictions:
 
 - A remote sandbox cannot reach a broker on a Unix socket
-  ([#8](https://github.com/mvasin/forgecrew/issues/8)).
+  ([#8](https://github.com/agent-pilled/ai-agents/issues/8)).
 - The worktree and credentials leave the operator's infrastructure.
   DigitalOcean puts secrets in the sandbox as environment variables.
 - Idle limits clash with long passes: DigitalOcean suspends after 15 minutes
@@ -123,7 +123,7 @@ open-source options that fit self-hosting. Daytona moved to closed source in
 
 - Credentials injected at egress, so the value never enters the sandbox
   (Vercel Sandbox, Cloudflare Outbound Workers, Claude Managed Agents vaults,
-  the OpenAI Agents API proxy) ([#7](https://github.com/mvasin/forgecrew/issues/7)).
+  the OpenAI Agents API proxy) ([#7](https://github.com/agent-pilled/ai-agents/issues/7)).
 - One lock object per key, as with a Cloudflare Durable Object per
   `(role, change)`, if a role ever spans hosts.
 - Checkpoint and fork as fixed starting states for replays.
@@ -135,7 +135,7 @@ binary with one's own subscription, including on hosted platforms. Products
 built on the Agent SDK must use API keys, credentials may not be collected,
 stored or intermediated, and Pro and Max limits assume ordinary, individual
 usage. A Claude box therefore drives the CLI, and API-key billing needs to be a
-first-class option ([#9](https://github.com/mvasin/forgecrew/issues/9)).
+first-class option ([#9](https://github.com/agent-pilled/ai-agents/issues/9)).
 
 ## Schools of thought
 
@@ -188,20 +188,20 @@ first-class option ([#9](https://github.com/mvasin/forgecrew/issues/9)).
   vendors; a self-hosted control plane on all three forges; and evaluation on
   the operator's side, which no vendor offers.
 - Four design changes follow from the evidence:
-  [#2](https://github.com/mvasin/forgecrew/issues/2) keep acceptance checks out
+  [#2](https://github.com/agent-pilled/ai-agents/issues/2) keep acceptance checks out
   of the author's reach;
-  [#3](https://github.com/mvasin/forgecrew/issues/3) let dev-bot report a task
+  [#3](https://github.com/agent-pilled/ai-agents/issues/3) let dev-bot report a task
   as impossible as specified;
-  [#4](https://github.com/mvasin/forgecrew/issues/4) add a self-review control
+  [#4](https://github.com/agent-pilled/ai-agents/issues/4) add a self-review control
   arm to evaluations;
-  [#5](https://github.com/mvasin/forgecrew/issues/5) evaluate author and
+  [#5](https://github.com/agent-pilled/ai-agents/issues/5) evaluate author and
   reviewer model pairings.
 - Agent runtimes suggest three more changes:
-  [#7](https://github.com/mvasin/forgecrew/issues/7) inject keychain
+  [#7](https://github.com/agent-pilled/ai-agents/issues/7) inject keychain
   credentials at egress;
-  [#8](https://github.com/mvasin/forgecrew/issues/8) keep the broker's
+  [#8](https://github.com/agent-pilled/ai-agents/issues/8) keep the broker's
   transport independent of the Unix socket;
-  [#9](https://github.com/mvasin/forgecrew/issues/9) ship an API-key path for
+  [#9](https://github.com/agent-pilled/ai-agents/issues/9) ship an API-key path for
   Claude boxes and document subscription use.
 - On GitHub, rulesets that pin a required check to an App already provide the
   gate, and GitHub Agentic Workflows' safe-outputs design is worth studying

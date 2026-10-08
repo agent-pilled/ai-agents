@@ -1,4 +1,11 @@
-# Forgecrew
+# Agent-Pilled AI Agents: coding runtime terminology
+
+**Agent-Pilled** is the company brand. **AI Agents** is the product name;
+**Agent-Pilled AI Agents** is its full name. The repository is **agent-pilled/ai-agents**;
+**Forgecrew** remains the initial coding runtime name. Microsoft Teams and non-code tasks are planned
+product extensions, not capabilities of the current runtime. The terms below
+describe the coding design; extending review to other result types needs an
+explicit version and acceptance mechanism for each type.
 
 Each delivery role acts as its own forge identity and wakes on forge state,
 with role separation enforced by the forge and the host rather than by
