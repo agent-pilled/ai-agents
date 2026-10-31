@@ -77,6 +77,7 @@ pnpm check      # everything CI runs
   and `isolation`. Configuration will select the adapter for each seam.
 - `tools` holds operator tooling that is not runtime code, such as the helper
   that registers the GitHub Apps ([docs/github-apps.md](docs/github-apps.md)).
+- [docs/demo.md](docs/demo.md) is the runbook for the scripted demo where GitHub refuses the author's merge.
 - `site` holds the AI Agents landing page, plain HTML and CSS. Every push to
   `main` that touches it deploys it to GitHub Pages at `agents.agent-pilled.com`.
   The company homepage has a separate repository and Pages deployment.

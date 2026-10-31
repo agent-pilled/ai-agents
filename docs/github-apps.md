@@ -3,13 +3,15 @@
 On GitHub, each forge identity is a GitHub App, and a person has to click to
 create one. M1 needs two: the **review-bot** App, which is the code-review
 lane's identity, and the **scheduler** App, which has no write permission at
-all. The registration helper in [tools/github-apps](../tools/github-apps)
-reduces each App to one prefilled GitHub page and one click. Nothing here
-creates an App by itself, and no bot may change an App's permissions or
-installations ([Change control](design.md#change-control)).
+all. The scripted demo in [docs/demo.md](./demo.md) also registers **dev-bot**
+and **qa-bot**. The registration helper in
+[tools/github-apps](../tools/github-apps) reduces each App to one prefilled
+GitHub page and one click. Nothing here creates an App by itself, and no bot
+may change an App's permissions or installations
+([Change control](design.md#change-control)).
 
-Both Apps poll and receive no webhooks ([ADR 0004](adr/0004-polling-with-a-derived-scheduler.md)),
-and both are private, so each installs only on the account that owns it.
+Every App polls and receives no webhooks ([ADR 0004](adr/0004-polling-with-a-derived-scheduler.md)),
+and each is private, so it installs only on the account that owns it.
 
 ## Before you start
 
@@ -33,6 +35,8 @@ and both are private, so each installs only on the account that owns it.
 ```sh
 node tools/github-apps/register.ts --app review-bot --name "<App name>" --out <directory>
 node tools/github-apps/register.ts --app scheduler  --name "<App name>" --out <directory>
+node tools/github-apps/register.ts --app dev-bot    --name "<App name>" --out <directory>
+node tools/github-apps/register.ts --app qa-bot     --name "<App name>" --out <directory>
 ```
 
 Add `--org <organization>` when an organization owns the repositories; without
@@ -56,7 +60,8 @@ For each App:
    ([Credentials](design.md#credentials)).
 5. Install the App with the link the command printed: choose the owner's
    account, then **Only select repositories**, and pick the repositories the
-   instance serves. Install both Apps on the same repositories.
+   instance serves. Install each App on the repositories it serves. The demo
+   installs dev-bot, review-bot and qa-bot on the demo repository only.
 
 The helper does not keep the App's client secret or webhook secret, because
 Forgecrew uses neither. The App's settings page lets you delete the unused
@@ -94,7 +99,8 @@ GitHub has no permission that allows review comments but not approvals, so
 that line is held by the wireframe: the dispatcher is the only forge writer
 and never submits an approval ([ADR 0002](adr/0002-lane-verdicts-are-identity-bound-checks.md),
 [Mechanical rules on the way out](design.md#mechanical-rules-on-the-way-out)).
-Merging a pull request needs `contents: write`, which neither App holds.
+Merging a pull request needs `contents: write`. review-bot has `contents:
+read` only, so it cannot merge.
 
 ### scheduler
 
@@ -106,7 +112,35 @@ Merging a pull request needs `contents: write`, which neither App holds.
 | `pull_requests` | read | List changes with their heads, comments and reviews updated since the last poll. | Scheduler |
 | `statuses` | read | See completed commit statuses, which count as CI beside check runs. | Signals |
 
-Neither App has `administration` or `workflows`. To change an App's
+### dev-bot
+
+dev-bot is the author identity. It holds `contents: write`, which pushing and
+merging need, and `checks: write` on purpose: the scripted demo posts check
+runs named `review` and `qa` as dev-bot, and the ruleset still refuses the
+merge, because each required check is bound to the lane's App.
+
+| Permission | Access | Why | Design |
+| --- | --- | --- | --- |
+| `checks` | write | Create check runs, including ones named after a lane, so a ruleset can prove a check from this App does not count. | Verdicts and gates |
+| `contents` | write | Push commits onto the change and merge it when the forge allows, then delete the branch. | Handoff and merge |
+| `issues` | write | File follow-up issues a pass proposes, labelled as bot-proposed and never mentioning dev-bot. | Bot-created work |
+| `metadata` | read | Repository metadata, which GitHub adds read-only to any App with repository permissions; listed so the manifest shows the whole set. | Dispatcher |
+| `pull_requests` | write | Open the pull request and comment on it; never submit an approval. | Handoff and merge |
+
+### qa-bot
+
+qa-bot is the QA lane's identity for the scripted demo. It can record its own
+check run and read the change so it can run the repository's tests. It cannot
+push or merge.
+
+| Permission | Access | Why | Design |
+| --- | --- | --- | --- |
+| `checks` | write | Create and update the QA lane's check run: the claim on the captured head, then the verdict the ruleset requires. | Verdicts and gates, Dispatcher |
+| `contents` | read | Read the change at the captured head to run the repository's tests; never write, so it cannot merge. | Broker, Environment |
+| `metadata` | read | Repository metadata, which GitHub adds read-only to any App with repository permissions; listed so the manifest shows the whole set. | Dispatcher |
+| `pull_requests` | read | Read the pull request the QA lane verdicts. | Dispatcher |
+
+None of these Apps has `administration` or `workflows`. To change an App's
 permissions later, edit the App by hand; the owner of each installation then
 accepts the new request.
 
@@ -122,7 +156,10 @@ that App can satisfy the check, so no other identity can post the verdict
 ([ADR 0002](adr/0002-lane-verdicts-are-identity-bound-checks.md)). The policy
 is loose, since branches need not be up to date
 ([Handoff and merge](design.md#handoff-and-merge)). The scheduler App appears
-in no ruleset.
+in no ruleset. The scripted demo's ruleset, which
+[tools/demo/ruleset.ts](../tools/demo/ruleset.ts) prints, binds `review` to
+review-bot and `qa` to qa-bot the same way. dev-bot is not a source of either
+check.
 
 ## Sources
 

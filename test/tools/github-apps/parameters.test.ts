@@ -63,8 +63,8 @@ describe("parsing the registration parameters", () => {
   });
 
   it("rejects an unknown App and names the valid ones", () => {
-    expect(() => parseParameters({ ...valid, app: "dev-bot" })).toThrow(
-      /review-bot, scheduler/,
+    expect(() => parseParameters({ ...valid, app: "arbiter-bot" })).toThrow(
+      /review-bot, scheduler, dev-bot, qa-bot/,
     );
   });
 

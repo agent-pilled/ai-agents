@@ -1,0 +1,9 @@
+{
+  "name": "forgecrew-demo-target",
+  "private": true,
+  "type": "module",
+  "description": "A tiny program with an intentional bug, for the Forgecrew scripted demo.",
+  "scripts": {
+    "test": "node --test"
+  }
+}
