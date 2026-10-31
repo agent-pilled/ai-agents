@@ -34,6 +34,21 @@ const schedulerPermissions = {
   statuses: "read",
 };
 
+const devBotPermissions = {
+  checks: "write",
+  contents: "write",
+  issues: "write",
+  metadata: "read",
+  pull_requests: "write",
+};
+
+const qaBotPermissions = {
+  checks: "write",
+  contents: "read",
+  metadata: "read",
+  pull_requests: "read",
+};
+
 // The parameters GitHub documents for a manifest:
 // https://docs.github.com/en/apps/sharing-github-apps/registering-a-github-app-from-a-manifest
 const documentedManifestParameters = [
@@ -52,8 +67,8 @@ const documentedManifestParameters = [
 ];
 
 describe("the App manifests", () => {
-  it("define exactly the two Apps M1 needs", () => {
-    expect(APP_KINDS).toEqual(["review-bot", "scheduler"]);
+  it("lists the Apps an operator can register", () => {
+    expect(APP_KINDS).toEqual(["review-bot", "scheduler", "dev-bot", "qa-bot"]);
   });
 
   it("give the review-bot App exactly the permissions of the review lane", () => {
@@ -71,13 +86,36 @@ describe("the App manifests", () => {
     );
   });
 
+  it("give dev-bot the permissions the scripted author needs, including checks: write", () => {
+    const manifest = buildManifest({ kind: "dev-bot", ...params });
+
+    expect(manifest.default_permissions).toEqual(devBotPermissions);
+  });
+
+  it("give qa-bot the QA lane's permissions, without contents: write", () => {
+    const manifest = buildManifest({ kind: "qa-bot", ...params });
+
+    expect(manifest.default_permissions).toEqual(qaBotPermissions);
+  });
+
+  it("keeps contents: write for dev-bot alone, the identity that merges", () => {
+    expect(
+      buildManifest({ kind: "dev-bot", ...params }).default_permissions
+        .contents,
+    ).toBe("write");
+    for (const kind of ["review-bot", "scheduler", "qa-bot"] as const) {
+      expect(
+        buildManifest({ kind, ...params }).default_permissions.contents,
+        kind,
+      ).not.toBe("write");
+    }
+  });
+
   it.each(APP_KINDS)("never ask %s for administration or workflows", (kind) => {
     const { default_permissions } = buildManifest({ kind, ...params });
 
     expect(default_permissions).not.toHaveProperty("administration");
     expect(default_permissions).not.toHaveProperty("workflows");
-    // Merging needs contents:write, and no lane or scheduler merges.
-    expect(default_permissions).not.toHaveProperty("contents", "write");
   });
 
   it.each(APP_KINDS)(

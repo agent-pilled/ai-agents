@@ -301,7 +301,9 @@ describe("the register command", () => {
     expect(captured.stdout).toMatch(
       /Usage: node tools\/github-apps\/register\.ts/,
     );
-    expect(captured.stdout).toMatch(/review-bot or scheduler/);
+    expect(captured.stdout).toMatch(
+      /review-bot or scheduler or dev-bot or qa-bot/,
+    );
     expect(captured.stderr).toBe("");
   });
 
@@ -313,8 +315,8 @@ describe("the register command", () => {
     ],
     [
       "an unknown App",
-      ["--app", "dev-bot", "--name", "x", "--out", "/tmp/x"],
-      /review-bot, scheduler/,
+      ["--app", "arbiter-bot", "--name", "x", "--out", "/tmp/x"],
+      /review-bot, scheduler, dev-bot, qa-bot/,
     ],
     [
       "an invalid App name",

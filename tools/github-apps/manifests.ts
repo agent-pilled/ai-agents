@@ -1,4 +1,7 @@
-// The GitHub App manifests for the Apps that M1 creates by hand.
+// The GitHub App manifests an operator registers by hand.
+//
+// M1 needs review-bot and the scheduler. The scripted demo also registers
+// dev-bot and qa-bot (docs/demo.md). Nothing here creates an App.
 //
 // Each App gets the least privilege its role needs, derived from
 // docs/design.md. GitHub offers no way to create an App without a human, but
@@ -11,7 +14,12 @@
 // parameter of
 // https://docs.github.com/en/rest/apps/apps#create-an-installation-access-token-for-an-app
 
-export const APP_KINDS = ["review-bot", "scheduler"] as const;
+export const APP_KINDS = [
+  "review-bot",
+  "scheduler",
+  "dev-bot",
+  "qa-bot",
+] as const;
 export type AppKind = (typeof APP_KINDS)[number];
 
 export type PermissionName =
@@ -128,6 +136,54 @@ const grants: Readonly<Record<AppKind, readonly PermissionGrant[]>> = {
       design: ["Signals"],
     },
   ],
+  "dev-bot": [
+    {
+      permission: "checks",
+      access: "write",
+      why: "Create check runs, including ones named after a lane, so a ruleset can prove a check from this App does not count.",
+      design: ["Verdicts and gates"],
+    },
+    {
+      permission: "contents",
+      access: "write",
+      why: "Push commits onto the change and merge it when the forge allows, then delete the branch.",
+      design: ["Handoff and merge"],
+    },
+    {
+      permission: "issues",
+      access: "write",
+      why: "File follow-up issues a pass proposes, labelled as bot-proposed and never mentioning dev-bot.",
+      design: ["Bot-created work"],
+    },
+    metadata,
+    {
+      permission: "pull_requests",
+      access: "write",
+      why: "Open the pull request and comment on it; never submit an approval.",
+      design: ["Handoff and merge"],
+    },
+  ],
+  "qa-bot": [
+    {
+      permission: "checks",
+      access: "write",
+      why: "Create and update the QA lane's check run: the claim on the captured head, then the verdict the ruleset requires.",
+      design: ["Verdicts and gates", "Dispatcher"],
+    },
+    {
+      permission: "contents",
+      access: "read",
+      why: "Read the change at the captured head to run the repository's tests; never write, so it cannot merge.",
+      design: ["Broker", "Environment"],
+    },
+    metadata,
+    {
+      permission: "pull_requests",
+      access: "read",
+      why: "Read the pull request the QA lane verdicts.",
+      design: ["Dispatcher"],
+    },
+  ],
 };
 
 const descriptions: Readonly<Record<AppKind, string>> = {
@@ -135,6 +191,10 @@ const descriptions: Readonly<Record<AppKind, string>> = {
     "Forgecrew code-review lane. Records its verdict as a check run and posts review findings. Polls; no webhook.",
   scheduler:
     "Forgecrew scheduler. Reads pull requests, issues and checks to discover work. Read-only; polls; no webhook.",
+  "dev-bot":
+    "Forgecrew author. Pushes the change, opens the pull request and merges when the forge allows. Polls; no webhook.",
+  "qa-bot":
+    "Forgecrew QA lane. Records its verdict as a check run after running the repository's tests. Never writes the change. Polls; no webhook.",
 };
 
 export function permissionGrants(kind: AppKind): readonly PermissionGrant[] {
